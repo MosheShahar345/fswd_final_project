@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import Cart from './components/Cart.jsx';
+import Footer from './components/Footer.jsx';
 import Home from './pages/Home.jsx';
 import Shop from './pages/Shop.jsx';
 import Activities from './pages/Activities.jsx';
@@ -37,6 +38,7 @@ function App() {
               </Routes>
             </main>
             <Cart />
+            <Footer />
           </div>
         </CartProvider>
       </AuthProvider>
