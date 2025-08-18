@@ -2,11 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import Navbar from './components/Navbar.jsx';
+import Cart from './components/Cart.jsx';
 import Home from './pages/Home.jsx';
 import Shop from './pages/Shop.jsx';
 import Activities from './pages/Activities.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Checkout from './pages/Checkout.jsx';
+import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
 import Auth from './pages/Auth.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import TripDetail from './pages/TripDetail.jsx';
@@ -30,9 +32,11 @@ function App() {
                 <Route path="/activities/course/:id" element={<CourseDetail />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
                 <Route path="/auth" element={<Auth />} />
               </Routes>
             </main>
+            <Cart />
           </div>
         </CartProvider>
       </AuthProvider>

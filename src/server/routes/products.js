@@ -19,6 +19,7 @@ const validate = (schema) => (req, res, next) => {
 router.get('/', ProductController.getProducts);
 router.get('/categories', ProductController.getCategories);
 router.get('/brands', ProductController.getBrands);
+router.get('/stats', ProductController.getProductStats);
 router.get('/:id', ProductController.getProduct);
 
 // Protected routes (manager/admin only)

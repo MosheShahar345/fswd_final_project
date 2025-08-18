@@ -36,47 +36,53 @@ body {
   padding: 0 1rem;
 }
 
+/* Base button styles - only structural properties */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.5rem;
-  border: none;
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  border: none;
 }
 
+/* Global button variants - consistent across the entire application */
 .btn-primary {
-  background-color: #3b82f6;
-  color: white;
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: 1px solid #3b82f6 !important;
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
 }
 
 .btn-secondary {
-  background-color: #6b7280;
-  color: white;
+  background-color: #6b7280 !important;
+  color: white !important;
+  border: 1px solid #6b7280 !important;
 }
 
 .btn-secondary:hover {
-  background-color: #4b5563;
+  background-color: #4b5563 !important;
+  border-color: #4b5563 !important;
 }
 
 .btn-outline {
-  background-color: transparent;
-  border: 2px solid #3b82f6;
-  color: #3b82f6;
+  background-color: transparent !important;
+  border: 1px solid #3b82f6 !important;
+  color: #3b82f6 !important;
 }
 
 .btn-outline:hover {
-  background-color: #3b82f6;
-  color: white;
+  background-color: #3b82f6 !important;
+  color: white !important;
 }
 
 /* Card styles */
