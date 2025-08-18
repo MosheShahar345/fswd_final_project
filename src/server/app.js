@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
+import courseRoutes from './routes/courses.js';
 import { errorHandler, notFound } from './middlewares/error.js';
 
 const app = express();
@@ -36,6 +37,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/courses', courseRoutes);
 
 // 404 handler
 app.use('*', notFound);

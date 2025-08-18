@@ -130,13 +130,20 @@ async function initDatabase() {
       FOREIGN KEY (user_id) REFERENCES users (id)
     );
 
-    CREATE TABLE IF NOT EXISTS courses (
+    DROP TABLE IF EXISTS courses;
+    
+    CREATE TABLE courses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
-      level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced')),
+      subtitle TEXT,
+      level TEXT CHECK (level IN ('beginner', 'intermediate', 'advanced', 'professional')),
       price DECIMAL(10,2) NOT NULL,
       description TEXT,
-      active BOOLEAN DEFAULT 1
+      duration TEXT,
+      prerequisites TEXT,
+      max_depth TEXT,
+      active BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS course_sessions (
@@ -261,26 +268,51 @@ async function initDatabase() {
     VALUES (2, 'Coastal Kayaking', 'California', '2024-08-10', '2024-08-12', 8, 'easy', 299.99, 'Weekend kayaking along the Pacific coast')
   `);
 
-  // Sample courses
+  // Sample diving courses
   await db.run(`
-    INSERT OR IGNORE INTO courses (id, title, level, price, description) 
-    VALUES (1, 'Wilderness First Aid', 'beginner', 199.99, 'Learn essential first aid skills for outdoor adventures')
+    INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
+    VALUES (1, 'Open Water Diver', 'One Star Diver', 'beginner', 599.99, 'Your first step into the underwater world. Learn essential diving skills, safety procedures, and gain confidence in open water environments.', '3-4 days', 'None (10+ years old)', '18m (60ft)')
   `);
 
   await db.run(`
-    INSERT OR IGNORE INTO courses (id, title, level, price, description) 
-    VALUES (2, 'Advanced Rock Climbing', 'advanced', 399.99, 'Master advanced climbing techniques and safety protocols')
+    INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
+    VALUES (2, 'Advanced Open Water Diver', 'Two Star Diver', 'intermediate', 449.99, 'Expand your diving horizons with advanced techniques, deep diving, and specialized underwater navigation skills.', '2-3 days', 'Open Water Diver', '30m (100ft)')
   `);
 
-  // Sample course sessions
+  await db.run(`
+    INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
+    VALUES (3, 'Master Diver', 'Recreational Three Star Diver', 'advanced', 899.99, 'Achieve the highest recreational diving certification. Master advanced skills, rescue techniques, and become a leader in the diving community.', '5-7 days', 'Advanced Open Water + 50 dives', '40m (130ft)')
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
+    VALUES (4, 'Divemaster', 'Three Star Diver', 'professional', 1299.99, 'Begin your professional diving career. Learn to lead dives, assist instructors, and become a certified diving professional.', '4-6 weeks', 'Master Diver + 100 dives', '40m (130ft)')
+  `);
+
+  // Sample diving course sessions
   await db.run(`
     INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (1, 1, 2, '2024-06-15 09:00:00', 20)
+    VALUES (1, 1, 2, '2024-06-15 09:00:00', 12)
   `);
 
   await db.run(`
     INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (2, 2, 2, '2024-07-01 14:00:00', 12)
+    VALUES (2, 1, 2, '2024-07-01 09:00:00', 12)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
+    VALUES (3, 2, 2, '2024-06-20 14:00:00', 8)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
+    VALUES (4, 3, 2, '2024-07-10 09:00:00', 6)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
+    VALUES (5, 4, 2, '2024-08-01 09:00:00', 4)
   `);
 
   console.log('Database initialized successfully!');
@@ -289,7 +321,7 @@ async function initDatabase() {
   console.log('- Member user: member@adventuregear.com / user123');
   console.log('- 3 sample products');
   console.log('- 2 sample trips');
-  console.log('- 2 sample courses');
+  console.log('- 4 diving certification courses');
 }
 
 initDatabase().catch(console.error);
