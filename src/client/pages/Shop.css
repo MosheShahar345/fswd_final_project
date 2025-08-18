@@ -1,0 +1,132 @@
+.shop {
+  min-height: 100vh;
+}
+
+.shop-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.shop-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.shop-header p {
+  font-size: 1.125rem;
+  color: #64748b;
+}
+
+.shop-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Filters Sidebar */
+.filters-sidebar {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 6rem;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.filters-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.price-inputs {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.price-inputs span {
+  text-align: center;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Products Section */
+.products-section {
+  min-height: 400px;
+}
+
+.products-header {
+  margin-bottom: 2rem;
+}
+
+.products-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.no-products {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.no-products p {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .shop-layout {
+    grid-template-columns: 250px 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-sidebar {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .shop-header h1 {
+    font-size: 2rem;
+  }
+}
