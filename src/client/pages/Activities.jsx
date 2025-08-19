@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
+import EventCalendar from '../components/CourseCalendar.jsx';
 import './Activities.css';
 
 const Activities = () => {
@@ -10,10 +12,10 @@ const Activities = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [courseStats, setCourseStats] = useState(null);
-  const [enrolling, setEnrolling] = useState({});
-  const [enrollmentError, setEnrollmentError] = useState(null);
+
   const { user } = useAuth();
   const token = localStorage.getItem('token');
+  const { showSuccess } = useNotification();
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -59,49 +61,7 @@ const Activities = () => {
     }
   }, []);
 
-  // Handle course enrollment
-  const handleEnroll = async (courseId) => {
-    if (!user || !token) {
-      setEnrollmentError('Please log in to enroll in courses');
-      return;
-    }
 
-    setEnrolling(prev => ({ ...prev, [courseId]: true }));
-    setEnrollmentError(null);
-
-    try {
-      // For now, we'll enroll in the first available session
-      // In a real app, you'd show a session selection modal
-      const response = await fetch(`http://localhost:3000/api/courses/${courseId}/enroll`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          sessionId: 1 // Default to first session - in real app, let user choose
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to enroll in course');
-      }
-
-      // Show success message
-      alert('Successfully enrolled in course!');
-      
-      // Refresh courses to update enrollment counts
-      fetchCourses();
-      fetchCourseStats();
-    } catch (err) {
-      setEnrollmentError(err.message);
-      console.error('Error enrolling in course:', err);
-    } finally {
-      setEnrolling(prev => ({ ...prev, [courseId]: false }));
-    }
-  };
 
   // Load data when component mounts
   useEffect(() => {
@@ -128,6 +88,12 @@ const Activities = () => {
           onClick={() => handleTabChange('courses')}
         >
           🎓 Courses
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'calendar' ? 'active' : ''}`}
+          onClick={() => handleTabChange('calendar')}
+        >
+          📅 Calendar
         </button>
       </div>
 
@@ -209,7 +175,7 @@ const Activities = () => {
               </div>
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'courses' ? (
           <div className="courses-section">
             <h2>Diving Certification Courses</h2>
             <p className="courses-intro">
@@ -221,20 +187,12 @@ const Activities = () => {
             {courseStats && (
               <div className="course-stats">
                 <div className="stat-item">
-                  <span className="stat-number">{courseStats.total_courses}</span>
-                  <span className="stat-label">Total Courses</span>
-                </div>
-                <div className="stat-item">
                   <span className="stat-number">{courseStats.total_enrollments || 0}</span>
                   <span className="stat-label">Total Enrollments</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-number">{courseStats.unique_students || 0}</span>
                   <span className="stat-label">Active Students</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">${courseStats.avg_price || 0}</span>
-                  <span className="stat-label">Avg. Price</span>
                 </div>
               </div>
             )}
@@ -245,118 +203,111 @@ const Activities = () => {
               </div>
             )}
 
-                         {error && (
-               <div className="error-message">
-                 <p>Error: {error}</p>
-                 <button onClick={fetchCourses} className="btn btn-primary">Retry</button>
-               </div>
-             )}
+            {error && (
+              <div className="error-message">
+                <p>Error: {error}</p>
+                <button onClick={fetchCourses} className="btn btn-primary">Retry</button>
+              </div>
+            )}
 
-             {enrollmentError && (
-               <div className="error-message">
-                 <p>Enrollment Error: {enrollmentError}</p>
-                 <button onClick={() => setEnrollmentError(null)} className="btn btn-primary">Dismiss</button>
-               </div>
-             )}
+
 
             {!loading && !error && (
               <div className="activities-grid">
                 {courses.length === 0 ? (
-                <div className="no-courses">
-                  <p>No courses available at the moment.</p>
-                </div>
-              ) : (
-                courses.map((course) => {
-                  const getLevelIcon = (level) => {
-                    switch (level) {
-                      case 'beginner': return '🤿';
-                      case 'intermediate': return '🌊';
-                      case 'advanced': return '🏆';
-                      case 'professional': return '👨‍🏫';
-                      default: return '🎓';
-                    }
-                  };
+                  <div className="no-courses">
+                    <p>No courses available at the moment.</p>
+                  </div>
+                ) : (
+                  courses.map((course) => {
+                    const getLevelIcon = (level) => {
+                      switch (level) {
+                        case 'beginner': return '🤿';
+                        case 'intermediate': return '🌊';
+                        case 'advanced': return '🏆';
+                        case 'professional': return '👨‍🏫';
+                        default: return '🎓';
+                      }
+                    };
 
-                  const getLevelBadge = (level) => {
-                    switch (level) {
-                      case 'beginner': return 'Level 1';
-                      case 'intermediate': return 'Level 2';
-                      case 'advanced': return 'Level 3';
-                      case 'professional': return 'Professional';
-                      default: return level;
-                    }
-                  };
+                    const getLevelBadge = (level) => {
+                      switch (level) {
+                        case 'beginner': return 'Level 1';
+                        case 'intermediate': return 'Level 2';
+                        case 'advanced': return 'Level 3';
+                        case 'professional': return 'Professional';
+                        default: return level;
+                      }
+                    };
 
-                  const getBadgeClass = (level) => {
-                    switch (level) {
-                      case 'beginner': return 'badge-success';
-                      case 'intermediate': return 'badge-primary';
-                      case 'advanced': return 'badge-warning';
-                      case 'professional': return 'badge-danger';
-                      default: return 'badge-primary';
-                    }
-                  };
+                    const getBadgeClass = (level) => {
+                      switch (level) {
+                        case 'beginner': return 'badge-success';
+                        case 'intermediate': return 'badge-primary';
+                        case 'advanced': return 'badge-warning';
+                        case 'professional': return 'badge-danger';
+                        default: return 'badge-primary';
+                      }
+                    };
 
-                  return (
-                    <div key={course.id} className="activity-card course-card">
-                      <div className="activity-image">
-                        <div className="image-placeholder">{getLevelIcon(course.level)}</div>
-                        <div className="course-level-badge">{getLevelBadge(course.level)}</div>
-                      </div>
-                      <div className="activity-info">
-                        <h3>{course.title}</h3>
-                        <p className="course-subtitle">{course.subtitle}</p>
-                        <p className="course-description">{course.description}</p>
-                        <div className="course-details">
-                          <div className="detail-item">
-                            <span className="detail-label">Duration:</span>
-                            <span className="detail-value">{course.duration}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-label">Prerequisites:</span>
-                            <span className="detail-value">{course.prerequisites}</span>
-                          </div>
-                          <div className="detail-item">
-                            <span className="detail-label">Max Depth:</span>
-                            <span className="detail-value">{course.max_depth}</span>
-                          </div>
+                    return (
+                      <div key={course.id} className="activity-card course-card">
+                        <div className="activity-image">
+                          <div className="image-placeholder">{getLevelIcon(course.level)}</div>
+                          <div className="course-level-badge">{getLevelBadge(course.level)}</div>
                         </div>
-                        <div className="activity-meta">
-                          <span className={`badge ${getBadgeClass(course.level)}`}>
-                            {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
-                          </span>
-                          <span className="seats-left">
-                            {course.session_count > 0 ? `${course.session_count} sessions available` : 'No sessions scheduled'}
-                          </span>
-                        </div>
-                        <div className="activity-price">${course.price}</div>
-                        <div className="course-actions">
-                          <Link 
-                            to={`/activities/course/${course.id}`} 
-                            className="btn btn-outline"
-                          >
-                            View Details
-                          </Link>
-                          <button 
-                            className="btn btn-primary"
-                            onClick={() => handleEnroll(course.id)}
-                            disabled={enrolling[course.id]}
-                          >
-                            {enrolling[course.id] ? 'Enrolling...' : 'Enroll Now'}
-                          </button>
+                        <div className="activity-info">
+                          <h3>{course.title}</h3>
+                          <p className="course-subtitle">{course.subtitle}</p>
+                          <p className="course-description">{course.description}</p>
+                          <div className="course-details">
+                            <div className="detail-item">
+                              <span className="detail-label">Duration:</span>
+                              <span className="detail-value">{course.duration}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-label">Prerequisites:</span>
+                              <span className="detail-value">{course.prerequisites}</span>
+                            </div>
+                            <div className="detail-item">
+                              <span className="detail-label">Max Depth:</span>
+                              <span className="detail-value">{course.max_depth}</span>
+                            </div>
+                          </div>
+                          <div className="activity-meta">
+                            <span className={`badge ${getBadgeClass(course.level)}`}>
+                              {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                            </span>
+                            <span className="seats-left">
+                              {course.session_count > 0 ? `${course.session_count} sessions available` : 'No sessions scheduled'}
+                            </span>
+                          </div>
+                          <div className="activity-price">${course.price}</div>
+                          <div className="course-actions">
+                            <Link 
+                              to={`/activities/course/${course.id}`} 
+                              className="btn btn-primary"
+                            >
+                              View Details & Enroll
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                                     );
-                 })
-               )}
+                    );
+                  })
+                )}
               </div>
             )}
-           </div>
-         )}
-       </div>
-     </div>
-   );
- };
+          </div>
+        ) : null}
+
+        {/* Calendar Tab */}
+        {activeTab === 'calendar' && (
+          <EventCalendar />
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default Activities;

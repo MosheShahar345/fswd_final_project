@@ -17,7 +17,7 @@ const Footer = () => {
               Discover the wonders of the underwater world with our premium scuba diving experiences, 
               equipment, and expert guidance.
             </p>
-                         <div className="social-links">
+                <div className="social-links">
                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link">
                  <i className="fab fa-facebook-f"></i>
                </a>

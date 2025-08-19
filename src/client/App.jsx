@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
+import { NotificationProvider } from './contexts/NotificationContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import Cart from './components/Cart.jsx';
 import Footer from './components/Footer.jsx';
@@ -21,7 +22,8 @@ function App() {
     <Router>
       <AuthProvider>
         <CartProvider>
-          <div className="App">
+          <NotificationProvider>
+            <div className="App">
             <Navbar />
             <main className="main-content">
               <Routes>
@@ -40,6 +42,7 @@ function App() {
             <Cart />
             <Footer />
           </div>
+        </NotificationProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

@@ -33,58 +33,82 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (item, quantity = 1, type = 'product') => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
+      // For course enrollments, we need to check if already enrolled
+      if (type === 'course') {
+        const existingEnrollment = prevCart.find(cartItem => 
+          cartItem.type === 'course' && 
+          cartItem.courseId === item.courseId && 
+          cartItem.sessionId === item.sessionId
+        );
+        
+        if (existingEnrollment) {
+          console.warn('Already enrolled in this course session');
+          return prevCart;
+        }
+        
+        return [...prevCart, { ...item, type, quantity: 1 }];
+      }
+      
+      // For products, use existing logic
+      const existingItem = prevCart.find(cartItem => 
+        cartItem.type === 'product' && cartItem.id === item.id
+      );
       
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
         
         // Check stock availability
-        if (product.qty_on_hand !== undefined && newQuantity > product.qty_on_hand) {
-          console.warn(`Cannot add more than ${product.qty_on_hand} units of ${product.name}`);
+        if (item.qty_on_hand !== undefined && newQuantity > item.qty_on_hand) {
+          console.warn(`Cannot add more than ${item.qty_on_hand} units of ${item.name}`);
           return prevCart; // Don't update cart if exceeding stock
         }
         
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: newQuantity }
-            : item
+        return prevCart.map(cartItem =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: newQuantity }
+            : cartItem
         );
       } else {
         // Check stock availability for new items
-        if (product.qty_on_hand !== undefined && quantity > product.qty_on_hand) {
-          console.warn(`Cannot add more than ${product.qty_on_hand} units of ${product.name}`);
+        if (item.qty_on_hand !== undefined && quantity > item.qty_on_hand) {
+          console.warn(`Cannot add more than ${item.qty_on_hand} units of ${item.name}`);
           return prevCart; // Don't add item if exceeding stock
         }
         
-        return [...prevCart, { ...product, quantity }];
+        return [...prevCart, { ...item, type, quantity }];
       }
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  const removeFromCart = (itemId, type = 'product') => {
+    setCart(prevCart => prevCart.filter(item => !(item.type === type && item.id === itemId)));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (itemId, quantity, type = 'product') => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(itemId, type);
       return;
     }
 
     setCart(prevCart => {
-      const item = prevCart.find(item => item.id === productId);
+      const item = prevCart.find(cartItem => cartItem.type === type && cartItem.id === itemId);
       if (!item) return prevCart;
 
-      // Check stock availability
+      // For courses, quantity is always 1
+      if (type === 'course') {
+        return prevCart;
+      }
+
+      // Check stock availability for products
       if (item.qty_on_hand !== undefined && quantity > item.qty_on_hand) {
         console.warn(`Cannot set quantity higher than ${item.qty_on_hand} for ${item.name}`);
         return prevCart; // Don't update if exceeding stock
       }
 
-      return prevCart.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+      return prevCart.map(cartItem =>
+        cartItem.type === type && cartItem.id === itemId ? { ...cartItem, quantity } : cartItem
       );
     });
   };
@@ -94,23 +118,35 @@ export const CartProvider = ({ children }) => {
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => {
+      if (item.type === 'course') {
+        const coursePrice = parseFloat(item.coursePrice) || 0;
+        return total + coursePrice;
+      }
+      const price = parseFloat(item.price) || 0;
+      return total + (price * item.quantity);
+    }, 0);
   };
 
   const getCartCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
+    return cart.reduce((count, item) => {
+      if (item.type === 'course') {
+        return count + 1; // Courses count as 1 each
+      }
+      return count + item.quantity;
+    }, 0);
   };
 
   const getCartItemCount = () => {
     return cart.length;
   };
 
-  const isItemInCart = (productId) => {
-    return cart.some(item => item.id === productId);
+  const isItemInCart = (itemId, type = 'product') => {
+    return cart.some(item => item.type === type && item.id === itemId);
   };
 
-  const getItemQuantity = (productId) => {
-    const item = cart.find(item => item.id === productId);
+  const getItemQuantity = (itemId, type = 'product') => {
+    const item = cart.find(item => item.type === type && item.id === itemId);
     return item ? item.quantity : 0;
   };
 
@@ -118,12 +154,20 @@ export const CartProvider = ({ children }) => {
     const errors = [];
     
     cart.forEach(item => {
-      if (item.qty_on_hand !== undefined && item.quantity > item.qty_on_hand) {
+      if (item.type === 'product' && item.qty_on_hand !== undefined && item.quantity > item.qty_on_hand) {
         errors.push(`${item.name} - Only ${item.qty_on_hand} available, but ${item.quantity} in cart`);
       }
     });
     
     return errors;
+  };
+
+  const getCartProducts = () => {
+    return cart.filter(item => item.type === 'product');
+  };
+
+  const getCartCourses = () => {
+    return cart.filter(item => item.type === 'course');
   };
 
   const openCart = () => setIsOpen(true);
@@ -142,6 +186,8 @@ export const CartProvider = ({ children }) => {
     isItemInCart,
     getItemQuantity,
     validateCart,
+    getCartProducts,
+    getCartCourses,
     openCart,
     closeCart
   };

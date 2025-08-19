@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
@@ -7,13 +7,20 @@ import './Shop.css';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products
+  const [displayedProducts, setDisplayedProducts] = useState([]); // Currently displayed products
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [stats, setStats] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const observerRef = useRef();
+  const loadingRef = useRef();
 
   const [filters, setFilters] = useState({
     q: searchParams.get('q') || '',
@@ -21,7 +28,9 @@ const Shop = () => {
     category: searchParams.get('category') || '',
     min: searchParams.get('min') || '',
     max: searchParams.get('max') || '',
-    sort: searchParams.get('sort') || 'name'
+    sort: searchParams.get('sort') || 'name',
+    order: searchParams.get('order') || 'asc',
+    inStock: searchParams.get('inStock') || ''
   });
 
   const [activeFilters, setActiveFilters] = useState(0);
@@ -31,7 +40,7 @@ const Shop = () => {
   // Debounced search effect
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchProducts();
+      fetchAllProducts();
     }, 300);
 
     return () => clearTimeout(timer);
@@ -39,7 +48,9 @@ const Shop = () => {
 
   useEffect(() => {
     // Count active filters
-    const count = Object.values(filters).filter(value => value && value !== 'name').length;
+    const count = Object.values(filters).filter(value => 
+      value && value !== 'name' && value !== 'asc' && value !== '1'
+    ).length;
     setActiveFilters(count);
   }, [filters]);
 
@@ -50,9 +61,43 @@ const Shop = () => {
     fetchStats();
   }, []);
 
-  const fetchProducts = useCallback(async () => {
+  // Update displayed products when allProducts changes
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = currentPage * 10;
+    setDisplayedProducts(allProducts.slice(startIndex, endIndex));
+    setHasMore(endIndex < allProducts.length);
+  }, [allProducts, currentPage]);
+
+  // Intersection Observer for infinite scrolling
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreProducts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, loadingMore]);
+
+  const fetchAllProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setCurrentPage(1);
+    
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -64,7 +109,10 @@ const Shop = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setProducts(data);
+      const productsData = data.products || data;
+      setAllProducts(productsData);
+      setDisplayedProducts(productsData.slice(0, 10));
+      setHasMore(productsData.length > 10);
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Failed to load products. Please try again.');
@@ -72,6 +120,18 @@ const Shop = () => {
       setLoading(false);
     }
   }, [filters]);
+
+  const loadMoreProducts = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    
+    // Simulate loading delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setCurrentPage(prev => prev + 1);
+    setLoadingMore(false);
+  }, [loadingMore, hasMore]);
 
   const fetchCategories = async () => {
     try {
@@ -119,7 +179,7 @@ const Shop = () => {
     // Update URL params
     const newSearchParams = new URLSearchParams();
     Object.entries(newFilters).forEach(([k, v]) => {
-      if (v) newSearchParams.set(k, v);
+      if (v && v !== '1' && v !== 'asc') newSearchParams.set(k, v);
     });
     setSearchParams(newSearchParams);
   };
@@ -131,7 +191,9 @@ const Shop = () => {
       category: '',
       min: '',
       max: '',
-      sort: 'name'
+      sort: 'name',
+      order: 'asc',
+      inStock: ''
     };
     setFilters(newFilters);
     setSearchParams({});
@@ -139,11 +201,13 @@ const Shop = () => {
 
   const removeFilter = (key) => {
     const newFilters = { ...filters, [key]: '' };
+    if (key === 'sort') newFilters.sort = 'name';
+    if (key === 'order') newFilters.order = 'asc';
     setFilters(newFilters);
     
     const newSearchParams = new URLSearchParams();
     Object.entries(newFilters).forEach(([k, v]) => {
-      if (v) newSearchParams.set(k, v);
+      if (v && v !== '1' && v !== 'asc') newSearchParams.set(k, v);
     });
     setSearchParams(newSearchParams);
   };
@@ -156,6 +220,8 @@ const Shop = () => {
       case 'min': return `Min Price: $${value}`;
       case 'max': return `Max Price: $${value}`;
       case 'sort': return `Sort: ${value}`;
+      case 'order': return `Order: ${value}`;
+      case 'inStock': return `Stock: ${value === 'true' ? 'In Stock' : 'Out of Stock'}`;
       default: return value;
     }
   };
@@ -206,7 +272,7 @@ const Shop = () => {
           {activeFilters > 0 && (
             <div className="active-filters">
               {Object.entries(filters).map(([key, value]) => {
-                if (value && key !== 'sort') {
+                if (value && key !== 'sort' && key !== 'order' && value !== 'asc') {
                   return (
                     <span key={key} className="filter-tag">
                       {getFilterLabel(key, value)}
@@ -270,6 +336,20 @@ const Shop = () => {
             </select>
           </div>
 
+          {/* Stock Status */}
+          <div className="filter-group">
+            <label className="form-label">Stock Status</label>
+            <select
+              className="form-input"
+              value={filters.inStock}
+              onChange={(e) => handleFilterChange('inStock', e.target.value)}
+            >
+              <option value="">All Items</option>
+              <option value="true">In Stock</option>
+              <option value="false">Out of Stock</option>
+            </select>
+          </div>
+
           {/* Price Range */}
           <div className="filter-group">
             <label className="form-label">Price Range</label>
@@ -303,6 +383,21 @@ const Shop = () => {
               <option value="name">Name</option>
               <option value="price">Price</option>
               <option value="created_at">Newest</option>
+              <option value="brand">Brand</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+
+          {/* Sort Order */}
+          <div className="filter-group">
+            <label className="form-label">Sort Order</label>
+            <select
+              className="form-input"
+              value={filters.order}
+              onChange={(e) => handleFilterChange('order', e.target.value)}
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
             </select>
           </div>
         </aside>
@@ -317,22 +412,25 @@ const Shop = () => {
           ) : error ? (
             <div className="error">
               <p>{error}</p>
-              <button onClick={fetchProducts} className="btn btn-primary">
+              <button onClick={fetchAllProducts} className="btn btn-primary">
                 Try Again
               </button>
             </div>
           ) : (
             <>
               <div className="products-header">
-                <h2>{products.length} Products</h2>
+                <h2>{allProducts.length} Products</h2>
                 {activeFilters > 0 && (
                   <span className="filter-count">
                     {activeFilters} filter{activeFilters !== 1 ? 's' : ''} active
                   </span>
                 )}
+                <span className="displayed-count">
+                  Showing {displayedProducts.length} of {allProducts.length}
+                </span>
               </div>
               
-              {products.length === 0 ? (
+              {displayedProducts.length === 0 ? (
                 <div className="no-products">
                   <div className="no-products-icon">🔍</div>
                   <h3>No products found</h3>
@@ -342,16 +440,41 @@ const Shop = () => {
                   </button>
                 </div>
               ) : (
-                <div className="products-grid">
-                  {products.map(product => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={handleAddToCart}
-                      onQuickView={handleQuickView}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="products-grid">
+                    {displayedProducts.map(product => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onQuickView={handleQuickView}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Infinite Scroll Loading Indicator */}
+                  {hasMore && (
+                    <div ref={loadingRef} className="infinite-scroll-loader">
+                      {loadingMore ? (
+                        <div className="loading-more">
+                          <div className="spinner"></div>
+                          <span>Loading more products...</span>
+                        </div>
+                      ) : (
+                        <div className="scroll-hint">
+                          <span>Scroll down to load more products</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* End of results */}
+                  {!hasMore && allProducts.length > 0 && (
+                    <div className="end-of-results">
+                      <span>You've reached the end of the results</span>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}

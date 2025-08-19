@@ -1,0 +1,88 @@
+import { getDb } from './db.js';
+
+async function addSampleData() {
+  const db = await getDb();
+  
+  console.log('Adding sample dashboard data...');
+
+  // Add sample orders for user 4 (member)
+  await db.run(`
+    INSERT OR IGNORE INTO orders (id, user_id, total, status, payment_id) 
+    VALUES (1, 4, 219.98, 'delivered', 'pay_123456789')
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO orders (id, user_id, total, status, payment_id) 
+    VALUES (2, 4, 89.99, 'shipped', 'pay_987654321')
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO orders (id, user_id, total, status, payment_id) 
+    VALUES (3, 4, 199.99, 'pending', 'pay_456789123')
+  `);
+
+  // Add sample order items
+  await db.run(`
+    INSERT OR IGNORE INTO order_items (order_id, product_id, qty, price) 
+    VALUES (1, 1, 1, 129.99)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO order_items (order_id, product_id, qty, price) 
+    VALUES (1, 2, 1, 89.99)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO order_items (order_id, product_id, qty, price) 
+    VALUES (2, 2, 1, 89.99)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO order_items (order_id, product_id, qty, price) 
+    VALUES (3, 3, 1, 199.99)
+  `);
+
+  // Add sample enrollments for user 4
+  await db.run(`
+    INSERT OR IGNORE INTO enrollments (id, session_id, user_id, status) 
+    VALUES (1, 1, 4, 'enrolled')
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO enrollments (id, session_id, user_id, status) 
+    VALUES (2, 3, 4, 'enrolled')
+  `);
+
+  // Removed enrollment for session 4 (Master Diver) to allow testing
+  // await db.run(`
+  //   INSERT OR IGNORE INTO enrollments (id, session_id, user_id, status) 
+  //   VALUES (3, 4, 4, 'waitlist')
+  // `);
+
+  // Add sample trip bookings for user 4
+  await db.run(`
+    INSERT OR IGNORE INTO trip_bookings (id, trip_id, user_id, status, paid_amount) 
+    VALUES (1, 1, 4, 'confirmed', 899.99)
+  `);
+
+  await db.run(`
+    INSERT OR IGNORE INTO trip_bookings (id, trip_id, user_id, status, paid_amount) 
+    VALUES (2, 2, 4, 'confirmed', 299.99)
+  `);
+
+  // Update trip seats taken
+  await db.run(`
+    UPDATE trips SET seats_taken = 1 WHERE id = 1
+  `);
+
+  await db.run(`
+    UPDATE trips SET seats_taken = 1 WHERE id = 2
+  `);
+
+  console.log('Sample dashboard data added successfully!');
+  console.log('- 3 sample orders for user 4');
+  console.log('- 3 sample course enrollments for user 4');
+  console.log('- 2 sample trip bookings for user 4');
+}
+
+addSampleData().catch(console.error);

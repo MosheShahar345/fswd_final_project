@@ -51,6 +51,53 @@ export const getAllCoursesService = async ({ level, search, sort = 'title', orde
   return courses;
 };
 
+// Get all courses with sessions for calendar
+export const getAllCoursesWithSessionsService = async () => {
+  const db = await getDb();
+  
+  // Get all active courses
+  const courses = await db.all(`
+    SELECT 
+      c.id,
+      c.title,
+      c.subtitle,
+      c.level,
+      c.price,
+      c.description,
+      c.duration,
+      c.prerequisites,
+      c.max_depth,
+      c.active,
+      c.created_at
+    FROM courses c
+    WHERE c.active = 1
+    ORDER BY c.title ASC
+  `);
+  
+  // Get sessions for each course
+  for (const course of courses) {
+    const sessions = await db.all(`
+      SELECT 
+        cs.id,
+        cs.start_at,
+        cs.capacity,
+        u.name as instructor_name,
+        u.email as instructor_email,
+        COUNT(e.id) as enrolled_count
+      FROM course_sessions cs
+      LEFT JOIN users u ON cs.instructor_id = u.id
+      LEFT JOIN enrollments e ON cs.id = e.session_id AND e.status = 'enrolled'
+      WHERE cs.course_id = ? AND cs.start_at > datetime('now')
+      GROUP BY cs.id
+      ORDER BY cs.start_at ASC
+    `, [course.id]);
+    
+    course.sessions = sessions;
+  }
+  
+  return courses;
+};
+
 // Get course by ID
 export const getCourseByIdService = async (id) => {
   const db = await getDb();
@@ -273,4 +320,59 @@ export const getEnrollmentsService = async (courseId) => {
   `, [courseId]);
   
   return enrollments;
+};
+
+// Cancel enrollment
+export const cancelEnrollmentService = async (enrollmentId, userId) => {
+  const db = await getDb();
+  
+  // Get enrollment details
+  const enrollment = await db.get(`
+    SELECT 
+      e.*,
+      cs.start_at,
+      c.title as course_title
+    FROM enrollments e
+    JOIN course_sessions cs ON e.session_id = cs.id
+    JOIN courses c ON cs.course_id = c.id
+    WHERE e.id = ?
+  `, [enrollmentId]);
+  
+  if (!enrollment) {
+    throw new Error('Enrollment not found');
+  }
+  
+  // Check if user owns this enrollment
+  if (enrollment.user_id !== userId) {
+    throw new Error('Unauthorized');
+  }
+  
+  // Check if enrollment is already cancelled or dropped
+  if (enrollment.status === 'cancelled' || enrollment.status === 'dropped') {
+    throw new Error('Enrollment already cancelled');
+  }
+  
+  // Check if course starts within 24 hours
+  const now = new Date();
+  const courseStart = new Date(enrollment.start_at);
+  const timeDifference = courseStart.getTime() - now.getTime();
+  const hoursDifference = timeDifference / (1000 * 60 * 60);
+  
+  if (hoursDifference < 24) {
+    throw new Error('Cannot cancel - course starts within 24 hours');
+  }
+  
+  // Update enrollment status to dropped (since 'cancelled' is not in the current constraint)
+  await db.run(`
+    UPDATE enrollments 
+    SET status = 'dropped'
+    WHERE id = ?
+  `, [enrollmentId]);
+  
+  return {
+    id: enrollmentId,
+    status: 'dropped',
+    course_title: enrollment.course_title,
+    message: 'Enrollment cancelled successfully'
+  };
 };

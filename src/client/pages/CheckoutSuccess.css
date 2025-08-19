@@ -97,6 +97,111 @@
   color: #1e293b;
 }
 
+.order-items {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.order-items h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.items-list {
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-row.course-item {
+  background: #eff6ff;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  border-left: 4px solid #3b82f6;
+}
+
+.item-row span:first-child {
+  font-weight: 500;
+  color: #374151;
+}
+
+.item-row span:last-child {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-paid {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-shipped {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-delivered {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-refunded {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.error-message {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
 .success-actions {
   display: flex;
   gap: 1rem;

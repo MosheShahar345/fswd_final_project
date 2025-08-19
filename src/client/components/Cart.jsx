@@ -15,17 +15,22 @@ const Cart = () => {
   } = useCart();
 
   const formatPrice = (price) => {
+    // Handle undefined, null, or NaN prices
+    if (price === undefined || price === null || isNaN(price)) {
+      console.warn('Invalid price detected:', price);
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(price);
   };
 
-  const handleQuantityChange = (productId, newQuantity) => {
+  const handleQuantityChange = (itemId, newQuantity, type = 'product') => {
     if (newQuantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(itemId, type);
     } else {
-      updateQuantity(productId, newQuantity);
+      updateQuantity(itemId, newQuantity, type);
     }
   };
 
@@ -52,6 +57,40 @@ const Cart = () => {
           <>
             <div className="cart-items">
               {cart.map((item) => {
+                if (item.type === 'course') {
+                  console.log('Course item in cart:', item);
+                  return (
+                    <div key={item.id} className="cart-item cart-course-item">
+                      <div className="cart-item-image">
+                        <div className="course-icon">🎓</div>
+                        <div className="cart-item-price">{formatPrice(item.coursePrice)}</div>
+                      </div>
+                      
+                      <div className="cart-item-details">
+                        <h4 className="cart-item-name">{item.name}</h4>
+                        <p className="cart-item-brand">Course Enrollment</p>
+                        <p className="cart-item-session">Session: {new Date(item.sessionDate).toLocaleDateString()}</p>
+                        <p className="cart-item-instructor">Instructor: {item.instructorName}</p>
+                      </div>
+
+                      <div className="cart-item-controls">
+                        <button 
+                          onClick={() => removeFromCart(item.id, 'course')}
+                          className="remove-btn"
+                          aria-label="Remove course"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+
+                      <div className="cart-item-total">
+                        {formatPrice(item.coursePrice)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Product item
                 const placeholderImage = getProductImage(item);
                 const primaryImage = item.images?.find(img => img.is_primary) || item.images?.[0];
                 const imageUrl = primaryImage ? primaryImage.url : placeholderImage.url;
@@ -71,7 +110,7 @@ const Cart = () => {
                     <div className="cart-item-controls">
                       <div className="quantity-controls">
                         <button 
-                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          onClick={() => handleQuantityChange(item.id, item.quantity - 1, 'product')}
                           className="quantity-btn"
                           disabled={item.quantity <= 1}
                         >
@@ -79,7 +118,7 @@ const Cart = () => {
                         </button>
                         <span className="quantity-display">{item.quantity}</span>
                         <button 
-                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          onClick={() => handleQuantityChange(item.id, item.quantity + 1, 'product')}
                           className="quantity-btn"
                           disabled={item.qty_on_hand !== undefined && item.quantity >= item.qty_on_hand}
                         >
@@ -88,7 +127,7 @@ const Cart = () => {
                       </div>
                       
                       <button 
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.id, 'product')}
                         className="remove-btn"
                         aria-label="Remove item"
                       >

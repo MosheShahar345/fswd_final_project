@@ -176,6 +176,43 @@
   min-height: 80px;
 }
 
+/* Course item controls - no quantity controls needed */
+.cart-course-item .cart-item-controls {
+  justify-content: center;
+  min-height: 150px;
+  align-items: flex-start;
+  margin-right: 20px;
+}
+
+/* Mobile responsive adjustments for course items */
+@media (max-width: 768px) {
+  .cart-course-item .cart-item-controls {
+    min-height: 50px;
+    margin-right: 0;
+    justify-content: flex-start;
+  }
+  
+  .cart-course-item {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .cart-course-item .cart-item-details {
+    order: 1;
+  }
+  
+  .cart-course-item .cart-item-controls {
+    order: 2;
+    align-self: flex-start;
+  }
+  
+  .cart-course-item .cart-item-total {
+    order: 3;
+    align-self: center;
+    margin-top: -10px;
+  }
+}
+
 .quantity-controls {
   display: flex;
   align-items: center;
@@ -311,4 +348,33 @@
   .cart-actions {
     flex-direction: column;
   }
+}
+
+/* Course item styles */
+.cart-course-item {
+  border-left: 4px solid #3b82f6;
+}
+
+.course-icon {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: #eff6ff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.cart-item-session,
+.cart-item-instructor {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 2px 0;
+}
+
+/* Ensure last cart item has bottom border */
+.cart-modal .cart-item:last-child {
+  border-bottom: 1px solid #e2e8f0;
 }

@@ -1,12 +1,14 @@
 import { 
   getAllCoursesService, 
+  getAllCoursesWithSessionsService,
   getCourseByIdService, 
   createCourseService, 
   updateCourseService, 
   deleteCourseService,
   getCourseStatsService,
   enrollInCourseService,
-  getEnrollmentsService
+  getEnrollmentsService,
+  cancelEnrollmentService
 } from '../services/courseService.js';
 
 // Get all courses
@@ -22,6 +24,25 @@ export const getAllCourses = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching courses:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+// Get all courses with sessions for calendar
+export const getAllCoursesWithSessions = async (req, res) => {
+  try {
+    const courses = await getAllCoursesWithSessionsService();
+    
+    res.json({
+      success: true,
+      data: courses,
+      count: courses.length
+    });
+  } catch (error) {
+    console.error('Error fetching courses with sessions:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
@@ -213,6 +234,57 @@ export const getEnrollments = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching enrollments:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+};
+
+// Cancel enrollment
+export const cancelEnrollment = async (req, res) => {
+  try {
+    const { enrollmentId } = req.params;
+    const userId = req.user.id;
+    
+    const result = await cancelEnrollmentService(enrollmentId, userId);
+    
+    res.json({
+      success: true,
+      data: result,
+      message: 'Enrollment cancelled successfully'
+    });
+  } catch (error) {
+    console.error('Error cancelling enrollment:', error);
+    
+    if (error.message === 'Enrollment not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Enrollment not found'
+      });
+    }
+    
+    if (error.message === 'Unauthorized') {
+      return res.status(403).json({
+        success: false,
+        error: 'You can only cancel your own enrollments'
+      });
+    }
+    
+    if (error.message === 'Cannot cancel - course starts within 24 hours') {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot cancel enrollment. Course starts within 24 hours.'
+      });
+    }
+    
+    if (error.message === 'Enrollment already cancelled') {
+      return res.status(400).json({
+        success: false,
+        error: 'Enrollment is already cancelled'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: 'Internal server error'

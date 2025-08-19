@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import './Checkout.css';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, getCartTotal, clearCart, validateCart } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { showError } = useNotification();
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || '',
@@ -102,7 +104,7 @@ const Checkout = () => {
     // Check cart validation
     const cartErrors = validateCart();
     if (cartErrors.length > 0) {
-      alert('Some items in your cart are no longer available in the requested quantities. Please review your cart.');
+      showError('Some items in your cart are no longer available in the requested quantities. Please review your cart.');
       navigate('/shop');
       return;
     }
@@ -110,21 +112,63 @@ const Checkout = () => {
     setIsProcessing(true);
 
     try {
-      // Simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Prepare order data
+      const orderData = {
+        total: total,
+        items: cart.filter(item => item.type === 'product').map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        courses: cart.filter(item => item.type === 'course').map(item => ({
+          courseId: item.courseId,
+          sessionId: item.sessionId,
+          price: item.coursePrice
+        }))
+      };
+
+      console.log('Order data being sent:', orderData);
+      console.log('Cart contents:', cart);
+      console.log('Items count:', orderData.items?.length || 0);
+      console.log('Courses count:', orderData.courses?.length || 0);
+      console.log('Total items:', (orderData.items?.length || 0) + (orderData.courses?.length || 0));
+
+      // Create order in database
+      const response = await fetch('http://localhost:3000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Checkout error response:', errorData);
+        const errorMessage = errorData.error || errorData.message || JSON.stringify(errorData) || 'Failed to create order';
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
       
-      // Clear cart and redirect to success page
+      // Clear cart and redirect to success page with order ID
       clearCart();
-      navigate('/checkout/success');
+      navigate(`/checkout/success?orderId=${result.orderId}`);
     } catch (error) {
       console.error('Order processing failed:', error);
-      alert('There was an error processing your order. Please try again.');
+      showError('There was an error processing your order. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
   const formatPrice = (price) => {
+    // Handle undefined, null, or NaN prices
+    if (price === undefined || price === null || isNaN(price)) {
+      console.warn('Invalid price detected in checkout:', price);
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -134,6 +178,8 @@ const Checkout = () => {
   const subtotal = getCartTotal();
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
+  
+
 
   return (
     <div className="checkout">
@@ -282,7 +328,7 @@ const Checkout = () => {
                     <p>Qty: {item.quantity}</p>
                   </div>
                   <div className="item-price">
-                    {formatPrice(item.price * item.quantity)}
+                    {formatPrice(item.type === 'course' ? item.coursePrice : item.price * item.quantity)}
                   </div>
                 </div>
               ))}

@@ -282,6 +282,8 @@
   font-weight: 500;
 }
 
+
+
 /* Loading and error states */
 .loading-message,
 .error-message,
@@ -309,6 +311,8 @@
   color: #64748b;
   font-size: 1.125rem;
 }
+
+
 
  @media (max-width: 2000px) {
    .activities-grid {

@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const token = localStorage.getItem('token');
+  const { addToCart, isItemInCart } = useCart();
+  const { showSuccess } = useNotification();
   
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [enrolling, setEnrolling] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
-  const [enrollmentError, setEnrollmentError] = useState(null);
 
   useEffect(() => {
     fetchCourse();
@@ -42,46 +43,32 @@ const CourseDetail = () => {
     }
   };
 
-  const handleEnroll = async () => {
-    if (!user || !token) {
-      setEnrollmentError('Please log in to enroll in courses');
+  const handleAddToCart = () => {
+    if (!user) {
+      showSuccess('Please log in to add courses to cart');
       return;
     }
 
     if (!selectedSession) {
-      setEnrollmentError('Please select a session to enroll in');
+      showSuccess('Please select a session to add to cart');
       return;
     }
 
-    setEnrolling(true);
-    setEnrollmentError(null);
+    const courseItem = {
+      id: `course-${course.id}-${selectedSession.id}`,
+      courseId: course.id,
+      sessionId: selectedSession.id,
+      name: course.title,
+      coursePrice: parseFloat(course.price) || 0,
+      sessionDate: selectedSession.start_at,
+      instructorName: selectedSession.instructor_name,
+      level: course.level
+    };
+    
 
-    try {
-      const response = await fetch(`http://localhost:3000/api/courses/${id}/enroll`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          sessionId: selectedSession.id
-        })
-      });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to enroll in course');
-      }
-
-      alert('Successfully enrolled in course!');
-      fetchCourse(); // Refresh course data
-    } catch (err) {
-      setEnrollmentError(err.message);
-      console.error('Error enrolling in course:', err);
-    } finally {
-      setEnrolling(false);
-    }
+    addToCart(courseItem, 1, 'course');
+    showSuccess('Course added to cart!');
   };
 
   const formatDate = (dateString) => {
@@ -203,13 +190,6 @@ const CourseDetail = () => {
 
         <div className="course-sessions">
           <h2>Available Sessions</h2>
-          
-          {enrollmentError && (
-            <div className="error-message">
-              <p>{enrollmentError}</p>
-              <button onClick={() => setEnrollmentError(null)} className="btn btn-primary">Dismiss</button>
-            </div>
-          )}
 
           {course.sessions && course.sessions.length > 0 ? (
             <div className="sessions-list">
@@ -246,17 +226,17 @@ const CourseDetail = () => {
 
           {selectedSession && selectedSession.enrolled_count < selectedSession.capacity && (
             <div className="enrollment-section">
-              <h3>Enroll in Selected Session</h3>
+              <h3>Add to Cart</h3>
               <p>Session {selectedSession.id} - {formatDate(selectedSession.start_at)}</p>
               <p>Instructor: {selectedSession.instructor_name}</p>
               <p>Available spots: {selectedSession.capacity - selectedSession.enrolled_count}</p>
               
               <button 
                 className="btn btn-primary enroll-btn"
-                onClick={handleEnroll}
-                disabled={enrolling}
+                onClick={handleAddToCart}
+                disabled={isItemInCart(`course-${course.id}-${selectedSession.id}`, 'course')}
               >
-                {enrolling ? 'Enrolling...' : `Enroll Now - $${course.price}`}
+                {isItemInCart(`course-${course.id}-${selectedSession.id}`, 'course') ? 'Added to Cart' : `Add to Cart - $${course.price}`}
               </button>
             </div>
           )}

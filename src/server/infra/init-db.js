@@ -160,8 +160,9 @@ async function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
-      status TEXT DEFAULT 'enrolled' CHECK (status IN ('enrolled', 'waitlist', 'dropped')),
+      status TEXT DEFAULT 'enrolled' CHECK (status IN ('enrolled', 'waitlist', 'dropped', 'cancelled')),
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (session_id) REFERENCES course_sessions (id),
       FOREIGN KEY (user_id) REFERENCES users (id)
     );
