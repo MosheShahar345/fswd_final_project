@@ -291,22 +291,22 @@ async function initDatabase() {
   // Sample diving courses
   await db.run(`
     INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
-    VALUES (1, 'Open Water Diver', 'One Star Diver', 'beginner', 599.99, 'Your first step into the underwater world. Learn essential diving skills, safety procedures, and gain confidence in open water environments.', '3-4 days', 'None (10+ years old)', '18m (60ft)')
+    VALUES (1, 'Open Water Diver', 'One Star Diver', 'beginner', 599.99, 'The One Star Diver class teaches the effects of the underwater environment on the human body, and instills in the diver the correct guidelines and proper techniques for the aquatic realm, which will enable them to perform safe and enjoyable dives.', '3-4 days', 'None (10+ years old)', '18m (60ft)')
   `);
 
   await db.run(`
     INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
-    VALUES (2, 'Advanced Open Water Diver', 'Two Star Diver', 'intermediate', 449.99, 'Expand your diving horizons with advanced techniques, deep diving, and specialized underwater navigation skills.', '2-3 days', 'Open Water Diver', '30m (100ft)')
+    VALUES (2, 'Advanced Open Water Diver', 'Two Star Diver', 'intermediate', 449.99, 'The Advanced open water course aims to enhance build the diver''s techniques and abilities to deal with various situations underwater, to allow further evolution of the diver''s in-water and academic knowledge base, and advance the assessment, analysis and decision-making capabilities of the diver on any given dive.', '2-3 days', 'Open Water Diver', '30m (100ft)')
   `);
 
   await db.run(`
     INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
-    VALUES (3, 'Master Diver', 'Recreational Three Star Diver', 'advanced', 899.99, 'Achieve the highest recreational diving certification. Master advanced skills, rescue techniques, and become a leader in the diving community.', '5-7 days', 'Advanced Open Water + 50 dives', '40m (130ft)')
+    VALUES (3, 'Master Diver', 'Recreational Three Star Diver', 'advanced', 899.99, 'The Master Diver certification level is intended for experienced Two Star divers who would like to advance as divers, but are not interested in being trained as Dive Masters and leading dives.', '5-7 days', 'Advanced Open Water + 50 dives', '40m (130ft)')
   `);
 
   await db.run(`
     INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
-    VALUES (4, 'Divemaster', 'Three Star Diver', 'professional', 1299.99, 'Begin your professional diving career. Learn to lead dives, assist instructors, and become a certified diving professional.', '4-6 weeks', 'Master Diver + 100 dives', '40m (130ft)')
+    VALUES (4, 'Divemaster', 'Three Star Diver', 'professional', 1299.99, 'The Divemaster certification level is intended to bring the diver to a high level of proficiency, in both skills and knowledge. Upon its completion the diver will have acquired the abilities to deal with the majority of diving scenarios, as well exercise sound judgment in dynamic situations. These abilities allow the diver to assume responsibility guiding a group of (certified) divers, and place the diver in an ideal starting point for instructor training.', '4-6 weeks', 'Master Diver + 100 dives', '40m (130ft)')
   `);
 
   // Sample diving course sessions

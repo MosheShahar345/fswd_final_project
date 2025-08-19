@@ -292,7 +292,18 @@ const Activities = () => {
                         <div className="activity-info">
                           <h3>{course.title}</h3>
                           <p className="course-subtitle">{course.subtitle}</p>
-                          <p className="course-description">{course.description}</p>
+                          <p className="course-description">
+                            {course.level === 'beginner' && course.title === 'Open Water Diver' 
+                              ? 'Your first step into the underwater world. Learn essential diving skills and safety procedures.'
+                              : course.level === 'intermediate' && course.title === 'Advanced Open Water Diver'
+                              ? 'Expand your diving horizons with advanced techniques, deep diving, and specialized underwater navigation skills.'
+                              : course.level === 'advanced' && course.title === 'Master Diver'
+                              ? 'Achieve the highest recreational diving certification. Master advanced skills, rescue techniques, and become a leader in the diving community.'
+                              : course.level === 'professional' && course.title === 'Divemaster'
+                              ? 'Begin your professional diving career. Learn to lead dives, assist instructors, and become a certified diving professional.'
+                              : course.description
+                            }
+                          </p>
                           <div className="course-details">
                             <div className="detail-item">
                               <span className="detail-label">Duration:</span>
