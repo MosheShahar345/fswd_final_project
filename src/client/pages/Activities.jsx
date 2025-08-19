@@ -1,25 +1,44 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import EventCalendar from '../components/CourseCalendar.jsx';
+import { formatDateRange } from '../utils/dateUtils.js';
 import './Activities.css';
 
 const Activities = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'trips');
   const [courses, setCourses] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [courseStats, setCourseStats] = useState(null);
 
   const { user } = useAuth();
-  const token = localStorage.getItem('token');
-  const { showSuccess } = useNotification();
+  const { addToCart, cart } = useCart();
+  const { showSuccess, showError } = useNotification();
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setSearchParams({ tab });
+  };
+
+  const handleBookTrip = (trip) => {
+    const existingTrip = cart.find(item => item.type === 'trip' && item.id === trip.id);
+    
+    if (existingTrip) {
+      showError(`${trip.title} is already in your cart!`);
+      return;
+    }
+    
+    try {
+      addToCart(trip, 1, 'trip');
+      showSuccess(`${trip.title} added to cart!`);
+    } catch (error) {
+      showError(`Failed to add ${trip.title} to cart: ${error.message}`);
+    }
   };
 
   // Fetch courses from API
@@ -48,6 +67,20 @@ const Activities = () => {
     }
   }, []);
 
+  // Fetch trips from API
+  const fetchTrips = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/trips');
+      if (!response.ok) {
+        throw new Error('Failed to fetch trips');
+      }
+      const data = await response.json();
+      setTrips(data.data || []);
+    } catch (err) {
+      console.error('Error fetching trips:', err);
+    }
+  }, []);
+
   // Fetch course statistics
   const fetchCourseStats = useCallback(async () => {
     try {
@@ -66,8 +99,9 @@ const Activities = () => {
   // Load data when component mounts
   useEffect(() => {
     fetchCourses();
+    fetchTrips();
     fetchCourseStats();
-  }, [fetchCourses, fetchCourseStats]);
+  }, [fetchCourses, fetchTrips, fetchCourseStats]);
 
   return (
     <div className="activities">
@@ -100,79 +134,78 @@ const Activities = () => {
       <div className="activities-content">
         {activeTab === 'trips' ? (
           <div className="trips-section">
-            <h2>Diving Adventures & Trips</h2>
+            <h2>Diving Adventures & Marine Expeditions</h2>
             <p className="courses-intro">
-              Explore the world's most beautiful underwater destinations with our guided diving trips. 
-              From local reef dives to exotic international expeditions, we offer unforgettable underwater experiences.
+              Explore the world's most spectacular diving destinations. 
+              From thrilling shark encounters to vibrant coral reefs and blue holes, we offer unforgettable underwater experiences for all skill levels.
             </p>
             <div className="activities-grid">
-              <div className="activity-card">
-                <div className="activity-image">
-                  <div className="image-placeholder">🐠</div>
+              {trips.length === 0 ? (
+                <div className="no-trips">
+                  <p>No trips available at the moment.</p>
                 </div>
-                <div className="activity-info">
-                  <h3>Great Barrier Reef Expedition</h3>
-                  <p className="activity-location">Cairns, Australia</p>
-                  <p className="activity-dates">September 15-22, 2024</p>
-                  <div className="activity-meta">
-                    <span className="badge badge-primary">Intermediate</span>
-                    <span className="seats-left">6 seats left</span>
-                  </div>
-                  <div className="activity-price">$2,499.99</div>
-                  <button className="btn btn-primary">Book Now</button>
-                </div>
-              </div>
+              ) : (
+                trips.map((trip) => {
+                  const getDifficultyIcon = (difficulty) => {
+                    switch (difficulty) {
+                      case 'easy': return '🐠';
+                      case 'moderate': return '🪸';
+                      case 'hard': return '🦈';
+                      case 'expert': return '🏆';
+                      default: return '🐠';
+                    }
+                  };
 
-              <div className="activity-card">
-                <div className="activity-image">
-                  <div className="image-placeholder">🦈</div>
-                </div>
-                <div className="activity-info">
-                  <h3>Shark Diving Adventure</h3>
-                  <p className="activity-location">Gansbaai, South Africa</p>
-                  <p className="activity-dates">October 5-10, 2024</p>
-                  <div className="activity-meta">
-                    <span className="badge badge-warning">Advanced</span>
-                    <span className="seats-left">4 seats left</span>
-                  </div>
-                  <div className="activity-price">$1,899.99</div>
-                  <button className="btn btn-primary">Book Now</button>
-                </div>
-              </div>
+                  const getDifficultyBadge = (difficulty) => {
+                    switch (difficulty) {
+                      case 'easy': return 'Easy';
+                      case 'moderate': return 'Moderate';
+                      case 'hard': return 'Hard';
+                      case 'expert': return 'Expert';
+                      default: return difficulty;
+                    }
+                  };
 
-              <div className="activity-card">
-                <div className="activity-image">
-                  <div className="image-placeholder">🐋</div>
-                </div>
-                <div className="activity-info">
-                  <h3>Whale Watching Dive</h3>
-                  <p className="activity-location">Tonga</p>
-                  <p className="activity-dates">July 20-27, 2024</p>
-                  <div className="activity-meta">
-                    <span className="badge badge-success">Beginner</span>
-                    <span className="seats-left">8 seats left</span>
-                  </div>
-                  <div className="activity-price">$1,599.99</div>
-                  <button className="btn btn-primary">Book Now</button>
-                </div>
-              </div>
+                  const getBadgeClass = (difficulty) => {
+                    switch (difficulty) {
+                      case 'beginner': return 'badge-success';
+                      case 'intermediate': return 'badge-primary';
+                      case 'advanced': return 'badge-warning';
+                      case 'expert': return 'badge-danger';
+                      default: return 'badge-primary';
+                    }
+                  };
 
-              <div className="activity-card">
-                <div className="activity-image">
-                  <div className="image-placeholder">🪸</div>
-                </div>
-                <div className="activity-info">
-                  <h3>Caribbean Reef Discovery</h3>
-                  <p className="activity-location">Bonaire, Caribbean</p>
-                  <p className="activity-dates">November 10-17, 2024</p>
-                  <div className="activity-meta">
-                    <span className="badge badge-primary">Intermediate</span>
-                    <span className="seats-left">10 seats left</span>
-                  </div>
-                  <div className="activity-price">$1,299.99</div>
-                  <button className="btn btn-primary">Book Now</button>
-                </div>
-              </div>
+                  const seatsLeft = trip.seats_total - trip.seats_taken;
+
+                  return (
+                    <div key={trip.id} className="activity-card trip-card">
+                      <div className="activity-image">
+                        <div className="image-placeholder">{getDifficultyIcon(trip.difficulty)}</div>
+                      </div>
+                      <div className="activity-info">
+                        <h3>{trip.title}</h3>
+                        <p className="activity-location">{trip.location}</p>
+                        <p className="activity-dates">{formatDateRange(trip.start_date, trip.end_date)}</p>
+                        <div className="activity-meta">
+                          <span className={`badge ${getBadgeClass(trip.difficulty)}`}>
+                            {getDifficultyBadge(trip.difficulty)}
+                          </span>
+                          <span className="seats-left">{seatsLeft} seats left</span>
+                        </div>
+                        <div className="activity-price">${trip.price}</div>
+                        <button 
+                          className="btn btn-primary"
+                          onClick={() => handleBookTrip(trip)}
+                          disabled={seatsLeft <= 0}
+                        >
+                          {seatsLeft <= 0 ? 'Fully Booked' : 'Book Now'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         ) : activeTab === 'courses' ? (

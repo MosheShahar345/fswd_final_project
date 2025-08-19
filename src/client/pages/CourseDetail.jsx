@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
+import { formatDateTime } from '../utils/dateUtils.js';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
@@ -71,16 +72,7 @@ const CourseDetail = () => {
     showSuccess('Course added to cart!');
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+
 
   const getLevelIcon = (level) => {
     switch (level) {
@@ -201,7 +193,7 @@ const CourseDetail = () => {
                 >
                   <div className="session-info">
                     <h3>Session {session.id}</h3>
-                    <p className="session-date">{formatDate(session.start_at)}</p>
+                                            <p className="session-date">{formatDateTime(session.start_at)}</p>
                     <p className="session-instructor">Instructor: {session.instructor_name}</p>
                     <p className="session-capacity">
                       {session.enrolled_count}/{session.capacity} enrolled
@@ -227,7 +219,7 @@ const CourseDetail = () => {
           {selectedSession && selectedSession.enrolled_count < selectedSession.capacity && (
             <div className="enrollment-section">
               <h3>Add to Cart</h3>
-              <p>Session {selectedSession.id} - {formatDate(selectedSession.start_at)}</p>
+                                      <p>Session {selectedSession.id} - {formatDateTime(selectedSession.start_at)}</p>
               <p>Instructor: {selectedSession.instructor_name}</p>
               <p>Available spots: {selectedSession.capacity - selectedSession.enrolled_count}</p>
               

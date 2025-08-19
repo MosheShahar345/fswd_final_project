@@ -549,6 +549,9 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
 }
 
 .cta-card::before {
@@ -616,12 +619,14 @@
   color: #64748b;
   margin-bottom: 1.5rem;
   line-height: 1.6;
+  flex: 1;
 }
 
 .cta-btn {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  margin-top: auto;
 }
 
 
@@ -660,6 +665,11 @@
 
   .cta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cta-card {
+    min-height: 250px;
+    padding: 2rem;
   }
 }
 

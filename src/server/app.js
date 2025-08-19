@@ -10,6 +10,8 @@ import monitoringRoutes from './routes/monitoring.js';
 import dashboardRoutes from './routes/dashboard.js';
 import orderRoutes from './routes/orders.js';
 import tripRoutes from './routes/trips.js';
+import refundRoutes from './routes/refunds.js';
+import profileRoutes from './routes/profile.js';
 import { errorHandler, notFound } from './middlewares/error.js';
 import { requestLogger, securityLogger, rateLimitLogger, errorLogger } from './middlewares/logging.js';
 import { logger } from './utils/logger.js';
@@ -30,7 +32,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "http://localhost:3000"],
     },
   },
   crossOriginEmbedderPolicy: false
@@ -80,6 +82,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Static file serving for uploads with CORS headers
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static('public/uploads'));
+
 // Logging middleware
 app.use(requestLogger);
 app.use(securityLogger);
@@ -112,6 +123,8 @@ app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/refunds', refundRoutes);
+app.use('/api/profile', profileRoutes);
 
 // 404 handler
 app.use('*', notFound);

@@ -52,10 +52,10 @@ export class OrderService {
             throw new Error('Course session not found');
           }
 
-          // Check if user is already enrolled
+          // Check if user is already enrolled (only active enrollments)
           const existingEnrollment = await db.get(`
             SELECT id FROM enrollments 
-            WHERE user_id = ? AND session_id = ?
+            WHERE user_id = ? AND session_id = ? AND status = 'enrolled'
           `, [userId, course.sessionId]);
 
           if (existingEnrollment) {
@@ -73,9 +73,47 @@ export class OrderService {
 
           // Create enrollment
           await db.run(`
-            INSERT INTO enrollments (user_id, session_id, status, created_at) 
-            VALUES (?, ?, ?, datetime('now'))
-          `, [userId, course.sessionId, 'enrolled']);
+            INSERT INTO enrollments (user_id, session_id, order_id, status, created_at) 
+            VALUES (?, ?, ?, ?, datetime('now'))
+          `, [userId, course.sessionId, orderId, 'enrolled']);
+        }
+      }
+
+      // Create trip bookings
+      if (orderData.trips && orderData.trips.length > 0) {
+        for (const trip of orderData.trips) {
+          // Check if trip exists and has available seats
+          const tripData = await db.get(`
+            SELECT t.*, COUNT(tb.id) as seats_taken
+            FROM trips t
+            LEFT JOIN trip_bookings tb ON t.id = tb.trip_id AND tb.status = 'confirmed'
+            WHERE t.id = ? AND t.active = 1
+            GROUP BY t.id
+          `, [trip.tripId]);
+
+          if (!tripData) {
+            throw new Error('Trip not found');
+          }
+
+          if (tripData.seats_taken >= tripData.seats_total) {
+            throw new Error('Trip is full');
+          }
+
+          // Check if user already booked this trip
+          const existingBooking = await db.get(`
+            SELECT id FROM trip_bookings 
+            WHERE trip_id = ? AND user_id = ? AND status = 'confirmed'
+          `, [trip.tripId, userId]);
+
+          if (existingBooking) {
+            throw new Error('Already booked this trip');
+          }
+
+          // Create booking
+          await db.run(`
+            INSERT INTO trip_bookings (trip_id, user_id, order_id, status, paid_amount, created_at)
+            VALUES (?, ?, ?, 'confirmed', ?, datetime('now'))
+          `, [trip.tripId, userId, orderId, trip.price]);
         }
       }
 
@@ -129,7 +167,7 @@ export class OrderService {
         WHERE oi.order_id = ?
       `, [orderId]);
 
-      // Get course enrollments for this order (enrollments created on the same day as the order)
+      // Get course enrollments for this order
       const courseEnrollments = await db.all(`
         SELECT 
           e.id,
@@ -144,10 +182,27 @@ export class OrderService {
         JOIN course_sessions cs ON e.session_id = cs.id
         JOIN courses c ON cs.course_id = c.id
         JOIN users u ON cs.instructor_id = u.id
-        WHERE e.user_id = ? 
-        AND DATE(e.created_at) = DATE(?)
+        WHERE e.order_id = ? 
         AND e.status = 'enrolled'
-      `, [userId, order.created_at]);
+      `, [orderId]);
+
+      // Get trip bookings for this order
+      const tripBookings = await db.all(`
+        SELECT 
+          tb.id,
+          tb.status,
+          tb.paid_amount,
+          tb.created_at,
+          t.title as trip_title,
+          t.location,
+          t.start_date,
+          t.end_date,
+          t.difficulty
+        FROM trip_bookings tb
+        JOIN trips t ON tb.trip_id = t.id
+        WHERE tb.order_id = ? 
+        AND tb.status = 'confirmed'
+      `, [orderId]);
 
       const duration = Date.now() - startTime;
       logger.logDbOperation('SELECT', 'order_by_id', duration, true);
@@ -155,7 +210,8 @@ export class OrderService {
       return {
         order,
         items: orderItems,
-        courses: courseEnrollments
+        courses: courseEnrollments,
+        trips: tripBookings
       };
     } catch (error) {
       const duration = Date.now() - startTime;

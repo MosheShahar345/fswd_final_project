@@ -18,14 +18,16 @@ export class OrderController {
         ip: req.ip,
         orderData: {
           total: orderData.total,
-          itemCount: orderData.items?.length || 0
+          itemCount: orderData.items?.length || 0,
+          courseCount: orderData.courses?.length || 0,
+          tripCount: orderData.trips?.length || 0
         }
       });
 
       // Validate order data
-      const totalItems = (orderData.items?.length || 0) + (orderData.courses?.length || 0);
+      const totalItems = (orderData.items?.length || 0) + (orderData.courses?.length || 0) + (orderData.trips?.length || 0);
       if (totalItems === 0) {
-        throw new ValidationError('Order must contain at least one item or course');
+        throw new ValidationError('Order must contain at least one item, course, or trip');
       }
 
       if (!orderData.total || orderData.total <= 0) {

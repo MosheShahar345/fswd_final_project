@@ -1,4 +1,5 @@
 import { getDb } from '../infra/db.js';
+import { RefundService } from './refundService.js';
 
 // Get all courses with filtering and sorting
 export const getAllCoursesService = async ({ level, search, sort = 'title', order = 'asc' }) => {
@@ -362,17 +363,35 @@ export const cancelEnrollmentService = async (enrollmentId, userId) => {
     throw new Error('Cannot cancel - course starts within 24 hours');
   }
   
-  // Update enrollment status to dropped (since 'cancelled' is not in the current constraint)
+    // Update enrollment status to dropped (since 'cancelled' is not in the current constraint)
   await db.run(`
     UPDATE enrollments 
     SET status = 'dropped'
     WHERE id = ?
   `, [enrollmentId]);
-  
+
+  // Create refund request for the course price
+  const course = await db.get(`
+    SELECT c.price, c.id as course_id
+    FROM courses c
+    JOIN course_sessions cs ON c.id = cs.course_id
+    WHERE cs.id = ?
+  `, [enrollment.session_id]);
+
+  if (course && course.price > 0) {
+    await RefundService.createRefundRequest(
+      userId,
+      enrollmentId,
+      course.course_id,
+      course.price,
+      'Course enrollment cancelled by user'
+    );
+  }
+
   return {
     id: enrollmentId,
     status: 'dropped',
     course_title: enrollment.course_title,
-    message: 'Enrollment cancelled successfully'
+    message: 'Enrollment cancelled successfully. Refund request created.'
   };
 };

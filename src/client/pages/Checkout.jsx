@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
+import { formatDate, formatDateRange } from '../utils/dateUtils.js';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -26,19 +27,32 @@ const Checkout = () => {
 
   const [errors, setErrors] = useState({});
 
+  // Get cart breakdown
+  const products = cart.filter(item => item.type === 'product');
+  const courses = cart.filter(item => item.type === 'course');
+  const trips = cart.filter(item => item.type === 'trip');
+
   if (cart.length === 0) {
     return (
       <div className="checkout">
         <div className="checkout-container">
           <div className="checkout-empty">
             <h1>Your Cart is Empty</h1>
-            <p>Add some products to your cart to continue with checkout.</p>
-            <button 
-              onClick={() => navigate('/shop')} 
-              className="btn btn-primary"
-            >
-              Continue Shopping
-            </button>
+            <p>Add some items, courses, or trips to your cart to continue with checkout.</p>
+            <div className="checkout-empty-actions">
+              <button 
+                onClick={() => navigate('/shop')} 
+                className="btn btn-primary"
+              >
+                Browse Products
+              </button>
+              <button 
+                onClick={() => navigate('/activities')} 
+                className="btn btn-outline"
+              >
+                Browse Activities
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -105,7 +119,14 @@ const Checkout = () => {
     const cartErrors = validateCart();
     if (cartErrors.length > 0) {
       showError('Some items in your cart are no longer available in the requested quantities. Please review your cart.');
-      navigate('/shop');
+      // Navigate to appropriate page based on cart contents
+      if (products.length > 0) {
+        navigate('/shop');
+      } else if (courses.length > 0 || trips.length > 0) {
+        navigate('/activities');
+      } else {
+        navigate('/shop');
+      }
       return;
     }
 
@@ -124,6 +145,10 @@ const Checkout = () => {
           courseId: item.courseId,
           sessionId: item.sessionId,
           price: item.coursePrice
+        })),
+        trips: cart.filter(item => item.type === 'trip').map(item => ({
+          tripId: item.id,
+          price: item.price
         }))
       };
 
@@ -131,7 +156,8 @@ const Checkout = () => {
       console.log('Cart contents:', cart);
       console.log('Items count:', orderData.items?.length || 0);
       console.log('Courses count:', orderData.courses?.length || 0);
-      console.log('Total items:', (orderData.items?.length || 0) + (orderData.courses?.length || 0));
+      console.log('Trips count:', orderData.trips?.length || 0);
+      console.log('Total items:', (orderData.items?.length || 0) + (orderData.courses?.length || 0) + (orderData.trips?.length || 0));
 
       // Create order in database
       const response = await fetch('http://localhost:3000/api/orders', {
@@ -320,19 +346,68 @@ const Checkout = () => {
 
           <div className="checkout-summary">
             <h2>Order Summary</h2>
-            <div className="cart-items">
-              {cart.map((item) => (
-                <div key={item.id} className="cart-item">
-                  <div className="item-info">
-                    <h4>{item.name}</h4>
-                    <p>Qty: {item.quantity}</p>
-                  </div>
-                  <div className="item-price">
-                    {formatPrice(item.type === 'course' ? item.coursePrice : item.price * item.quantity)}
-                  </div>
+            
+            {/* Products Section */}
+            {products.length > 0 && (
+              <div className="summary-section">
+                <h3>Products</h3>
+                <div className="cart-items">
+                  {products.map((item) => (
+                    <div key={item.id} className="cart-item">
+                      <div className="item-info">
+                        <h4>{item.name}</h4>
+                        <p>Qty: {item.quantity}</p>
+                      </div>
+                      <div className="item-price">
+                        {formatPrice(item.price * item.quantity)}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Courses Section */}
+            {courses.length > 0 && (
+              <div className="summary-section">
+                <h3>Course Enrollments</h3>
+                <div className="cart-items">
+                  {courses.map((item) => (
+                    <div key={item.id} className="cart-item course-item">
+                      <div className="item-info">
+                        <h4>🎓 {item.name}</h4>
+                        <p>Session: {formatDate(item.sessionDate)}</p>
+                        <p>Instructor: {item.instructorName}</p>
+                      </div>
+                      <div className="item-price">
+                        {formatPrice(item.coursePrice)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trips Section */}
+            {trips.length > 0 && (
+              <div className="summary-section">
+                <h3>Trip Bookings</h3>
+                <div className="cart-items">
+                  {trips.map((item) => (
+                    <div key={item.id} className="cart-item trip-item">
+                      <div className="item-info">
+                        <h4>🏕️ {item.title}</h4>
+                        <p>📍 {item.location}</p>
+                        <p>📅 {formatDateRange(item.start_date, item.end_date)}</p>
+                      </div>
+                      <div className="item-price">
+                        {formatPrice(item.price)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="order-total">
               <div className="total-row">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { formatDate } from '../utils/dateUtils.js';
 import './CheckoutSuccess.css';
 
 const CheckoutSuccess = () => {
@@ -49,13 +50,7 @@ const CheckoutSuccess = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+
 
   if (loading) {
     return (
@@ -123,17 +118,17 @@ const CheckoutSuccess = () => {
                     {orderDetails.order.status.charAt(0).toUpperCase() + orderDetails.order.status.slice(1)}
                   </span>
                 </div>
-                <div className="info-row">
-                  <span>Items:</span>
-                  <span>{orderDetails.items.length + (orderDetails.courses?.length || 0)} item(s)</span>
-                </div>
+                                  <div className="info-row">
+                    <span>Items:</span>
+                    <span>{orderDetails.items.length + (orderDetails.courses?.length || 0) + (orderDetails.trips?.length || 0)} item(s)</span>
+                  </div>
                 <div className="info-row">
                   <span>Estimated Delivery:</span>
-                  <span>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                  <span>{formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))}</span>
                 </div>
               </div>
               
-              {(orderDetails.items.length > 0 || orderDetails.courses?.length > 0) && (
+                             {(orderDetails.items.length > 0 || orderDetails.courses?.length > 0 || orderDetails.trips?.length > 0) && (
                 <div className="order-items">
                   <h3>Order Items</h3>
                   <div className="items-list">
@@ -143,12 +138,18 @@ const CheckoutSuccess = () => {
                         <span>{item.qty} x {formatCurrency(item.price)}</span>
                       </div>
                     ))}
-                    {orderDetails.courses?.map((course, index) => (
-                      <div key={`course-${index}`} className="item-row course-item">
-                        <span>🎓 {course.course_name} - {course.course_level}</span>
-                        <span>1 x {formatCurrency(course.course_price)}</span>
-                      </div>
-                    ))}
+                                         {orderDetails.courses?.map((course, index) => (
+                       <div key={`course-${index}`} className="item-row course-item">
+                         <span>🎓 {course.course_name} - {course.course_level}</span>
+                         <span>1 x {formatCurrency(course.course_price)}</span>
+                       </div>
+                     ))}
+                     {orderDetails.trips?.map((trip, index) => (
+                       <div key={`trip-${index}`} className="item-row trip-item">
+                         <span>🏕️ {trip.trip_title} - {trip.location}</span>
+                         <span>1 x {formatCurrency(trip.paid_amount)}</span>
+                       </div>
+                     ))}
                   </div>
                 </div>
               )}

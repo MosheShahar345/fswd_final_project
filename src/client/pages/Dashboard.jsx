@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
+import { useSearchParams } from 'react-router-dom';
+import { formatDate, formatDateRange } from '../utils/dateUtils.js';
+import ProfileSettings from '../components/ProfileSettings.jsx';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { showSuccess, showError, showWarning } = useNotification();
+  const [searchParams] = useSearchParams();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +21,14 @@ const Dashboard = () => {
       fetchDashboardData();
     }
   }, [user]);
+
+  // Handle tab parameter from URL
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['overview', 'orders', 'enrollments', 'trips', 'profile'].includes(tabParam)) {
+      setSelectedTab(tabParam);
+    }
+  }, [searchParams]);
 
   const fetchDashboardData = async () => {
     try {
@@ -41,13 +53,7 @@ const Dashboard = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -197,14 +203,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">💰</div>
-            <div className="stat-content">
-              <h3>{formatCurrency(dashboardData.stats.orders.totalSpent)}</h3>
-              <p>Total Spent</p>
-              <small>All time</small>
-            </div>
-          </div>
+
         </div>
       )}
 
@@ -228,12 +227,18 @@ const Dashboard = () => {
          >
            Courses ({dashboardData?.recentEnrollments?.length || 0})
          </button>
-         <button 
-           className={`btn ${selectedTab === 'trips' ? 'active' : ''}`}
-           onClick={() => setSelectedTab('trips')}
-         >
-           Trips ({dashboardData?.recentTripBookings?.length || 0})
-         </button>
+                 <button 
+          className={`btn ${selectedTab === 'trips' ? 'active' : ''}`}
+          onClick={() => setSelectedTab('trips')}
+        >
+          Trips ({dashboardData?.recentTripBookings?.length || 0})
+        </button>
+        <button 
+          className={`btn ${selectedTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setSelectedTab('profile')}
+        >
+          Profile
+        </button>
        </div>
 
       {/* Tab Content */}
@@ -315,7 +320,7 @@ const Dashboard = () => {
                       </div>
                       <div className="item-details">
                         <p><strong>Location:</strong> {booking.location}</p>
-                        <p><strong>Dates:</strong> {formatDate(booking.start_date)} - {formatDate(booking.end_date)}</p>
+                        <p><strong>Dates:</strong> {formatDateRange(booking.start_date, booking.end_date)}</p>
                         <p><strong>Paid:</strong> {formatCurrency(booking.paid_amount)}</p>
                       </div>
                     </div>
@@ -423,7 +428,7 @@ const Dashboard = () => {
                     <div className="item-details">
                       <p><strong>Location:</strong> {booking.location}</p>
                       <p><strong>Difficulty:</strong> {booking.difficulty}</p>
-                      <p><strong>Dates:</strong> {formatDate(booking.start_date)} - {formatDate(booking.end_date)}</p>
+                      <p><strong>Dates:</strong> {formatDateRange(booking.start_date, booking.end_date)}</p>
                       <p><strong>Paid Amount:</strong> {formatCurrency(booking.paid_amount)}</p>
                       <p><strong>Booked:</strong> {formatDate(booking.created_at)}</p>
                     </div>
@@ -433,6 +438,13 @@ const Dashboard = () => {
             ) : (
               <p className="no-items">No trip bookings yet. Explore our adventure trips!</p>
             )}
+          </div>
+        )}
+
+        {/* Profile Tab */}
+        {selectedTab === 'profile' && (
+          <div className="profile-content">
+            <ProfileSettings />
           </div>
         )}
       </div>

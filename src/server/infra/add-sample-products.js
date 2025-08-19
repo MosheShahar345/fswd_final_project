@@ -3,175 +3,332 @@ import { getDb } from './db.js';
 async function addSampleProducts() {
   const db = await getDb();
   
-  console.log('Adding sample products...');
+  console.log('Adding scuba diving gear products...');
 
   const products = [
-    // Backpacks
+    // Buoyancy Control Devices (BCDs)
     {
-      name: 'Adventure Backpack 65L',
-      description: 'Large capacity backpack for multi-day trips with multiple compartments',
-      brand: 'AdventurePro',
-      category: 'Backpacks',
-      price: 129.99
+      name: 'ScubaPro Hydros Pro BCD',
+      description: 'Revolutionary lightweight BCD with integrated weight system and quick-release harness',
+      brand: 'ScubaPro',
+      category: 'Buoyancy Control Devices',
+      price: 899.99
     },
     {
-      name: 'Day Hiking Pack 25L',
-      description: 'Lightweight day pack perfect for day hikes and short adventures',
-      brand: 'TrailMaster',
-      category: 'Backpacks',
-      price: 79.99
+      name: 'Cressi Travelight BCD',
+      description: 'Lightweight travel BCD with integrated weight pockets and adjustable harness',
+      brand: 'Cressi',
+      category: 'Buoyancy Control Devices',
+      price: 449.99
     },
     {
-      name: 'Ultralight Backpack 40L',
-      description: 'Ultralight backpack for thru-hiking and minimalist adventures',
-      brand: 'LightGear',
-      category: 'Backpacks',
-      price: 159.99
-    },
-
-    // Hiking
-    {
-      name: 'Trekking Poles',
-      description: 'Lightweight aluminum trekking poles with cork grips',
-      brand: 'TrailMaster',
-      category: 'Hiking',
-      price: 89.99
+      name: 'Mares Avanti Quattro+ BCD',
+      description: 'Versatile BCD with multiple D-rings and comfortable padding for extended dives',
+      brand: 'Mares',
+      category: 'Buoyancy Control Devices',
+      price: 599.99
     },
     {
-      name: 'Hiking Boots Waterproof',
-      description: 'Waterproof hiking boots with excellent traction and support',
-      brand: 'MountainFoot',
-      category: 'Hiking',
-      price: 149.99
-    },
-    {
-      name: 'Hiking Socks Merino',
-      description: 'Merino wool hiking socks for comfort and moisture wicking',
-      brand: 'TrailMaster',
-      category: 'Hiking',
-      price: 24.99
+      name: 'Aqualung Dimension i3 BCD',
+      description: 'Innovative BCD with i3 weight system and comfortable shoulder design',
+      brand: 'Aqualung',
+      category: 'Buoyancy Control Devices',
+      price: 749.99
     },
 
-    // Camping
+    // Regulators
     {
-      name: 'Waterproof Tent 2P',
-      description: '2-person waterproof tent with rainfly and vestibule',
-      brand: 'CampLife',
-      category: 'Camping',
-      price: 199.99
+      name: 'ScubaPro MK25 EVO/S620Ti Regulator',
+      description: 'High-performance regulator with titanium second stage for cold water diving',
+      brand: 'ScubaPro',
+      category: 'Regulators',
+      price: 1299.99
     },
     {
-      name: 'Sleeping Bag 20°F',
-      description: 'Mummy sleeping bag rated for 20°F temperatures',
-      brand: 'CampLife',
-      category: 'Camping',
-      price: 89.99
+      name: 'Cressi AC2/AC2 Regulator Set',
+      description: 'Reliable regulator set with balanced first stage and adjustable second stage',
+      brand: 'Cressi',
+      category: 'Regulators',
+      price: 399.99
     },
     {
-      name: 'Camping Stove',
-      description: 'Portable camping stove with wind protection',
-      brand: 'FireGear',
-      category: 'Camping',
-      price: 69.99
+      name: 'Mares Abyss 22 Navy II Regulator',
+      description: 'Military-grade regulator with cold water capability and excellent breathing performance',
+      brand: 'Mares',
+      category: 'Regulators',
+      price: 649.99
     },
     {
-      name: 'Camping Chair',
-      description: 'Lightweight camping chair with cup holder',
-      brand: 'CampLife',
-      category: 'Camping',
-      price: 39.99
-    },
-
-    // Climbing
-    {
-      name: 'Climbing Harness',
-      description: 'Comfortable climbing harness with gear loops',
-      brand: 'RockPro',
-      category: 'Climbing',
-      price: 89.99
-    },
-    {
-      name: 'Climbing Shoes',
-      description: 'Aggressive climbing shoes for technical routes',
-      brand: 'RockPro',
-      category: 'Climbing',
-      price: 129.99
-    },
-    {
-      name: 'Climbing Rope 60m',
-      description: 'Dynamic climbing rope with dry treatment',
-      brand: 'RockPro',
-      category: 'Climbing',
-      price: 199.99
+      name: 'Aqualung Legend LX Supreme Regulator',
+      description: 'Premium regulator with balanced piston design and environmental sealing',
+      brand: 'Aqualung',
+      category: 'Regulators',
+      price: 899.99
     },
 
-    // Water Sports
+    // Wetsuits
     {
-      name: 'Inflatable Kayak',
-      description: '2-person inflatable kayak with paddles and pump',
-      brand: 'WaterAdventure',
-      category: 'Water Sports',
+      name: 'ScubaPro Everflex 7mm Wetsuit',
+      description: 'Premium 7mm wetsuit with Everflex neoprene for maximum flexibility and warmth',
+      brand: 'ScubaPro',
+      category: 'Wetsuits',
+      price: 549.99
+    },
+    {
+      name: 'Cressi Comfort 5mm Wetsuit',
+      description: 'Comfortable 5mm wetsuit with stretch neoprene for tropical diving',
+      brand: 'Cressi',
+      category: 'Wetsuits',
       price: 299.99
     },
     {
-      name: 'PFD Life Jacket',
-      description: 'Type III PFD life jacket for water activities',
-      brand: 'WaterAdventure',
-      category: 'Water Sports',
-      price: 59.99
+      name: 'Mares Flexa 3mm Wetsuit',
+      description: 'Lightweight 3mm wetsuit with maximum flexibility for warm water diving',
+      brand: 'Mares',
+      category: 'Wetsuits',
+      price: 199.99
     },
     {
-      name: 'Waterproof Dry Bag',
-      description: 'Waterproof dry bag for protecting gear on water',
-      brand: 'WaterAdventure',
-      category: 'Water Sports',
-      price: 34.99
-    },
-
-    // Electronics
-    {
-      name: 'GPS Device',
-      description: 'Handheld GPS device with topographic maps',
-      brand: 'TechGear',
-      category: 'Electronics',
-      price: 249.99
-    },
-    {
-      name: 'Headlamp LED',
-      description: 'Bright LED headlamp with multiple light modes',
-      brand: 'TechGear',
-      category: 'Electronics',
-      price: 44.99
-    },
-    {
-      name: 'Portable Charger',
-      description: 'High-capacity portable charger for devices',
-      brand: 'TechGear',
-      category: 'Electronics',
-      price: 79.99
+      name: 'Aqualung Solafx 6.5mm Wetsuit',
+      description: 'Thermal protection wetsuit with Solafx technology for cold water diving',
+      brand: 'Aqualung',
+      category: 'Wetsuits',
+      price: 449.99
     },
 
-    // Clothing
+    // Drysuits
     {
-      name: 'Waterproof Jacket',
-      description: 'Lightweight waterproof jacket with breathable membrane',
-      brand: 'WeatherGear',
-      category: 'Clothing',
+      name: 'ScubaPro Everdry 4 Dry Suit',
+      description: 'Premium drysuit with trilaminate construction and dry zipper system',
+      brand: 'ScubaPro',
+      category: 'Drysuits',
+      price: 1899.99
+    },
+    {
+      name: 'DUI FLX Extreme Dry Suit',
+      description: 'Heavy-duty drysuit with reinforced knees and ankles for technical diving',
+      brand: 'DUI',
+      category: 'Drysuits',
+      price: 2499.99
+    },
+    {
+      name: 'Santi E.Lite+ Dry Suit',
+      description: 'Lightweight drysuit with compressed neoprene for maximum mobility',
+      brand: 'Santi',
+      category: 'Drysuits',
+      price: 2199.99
+    },
+
+    // Tanks
+    {
+      name: 'Luxfer Aluminum 80 Tank',
+      description: 'Standard 80 cubic foot aluminum tank with 3000 PSI working pressure',
+      brand: 'Luxfer',
+      category: 'Tanks',
+      price: 299.99
+    },
+    {
+      name: 'Catalina Steel 100 Tank',
+      description: 'High-capacity steel tank with 3442 PSI for extended bottom time',
+      brand: 'Catalina',
+      category: 'Tanks',
+      price: 449.99
+    },
+    {
+      name: 'Worthington Steel 120 Tank',
+      description: 'Large capacity steel tank for technical diving and extended range',
+      brand: 'Worthington',
+      category: 'Tanks',
+      price: 599.99
+    },
+
+    // Fins
+    {
+      name: 'ScubaPro Jet Fin',
+      description: 'Classic paddle fins with excellent power and control for technical diving',
+      brand: 'ScubaPro',
+      category: 'Fins',
+      price: 199.99
+    },
+    {
+      name: 'Cressi Gara Modular Fins',
+      description: 'Adjustable open-heel fins with modular foot pocket system',
+      brand: 'Cressi',
+      category: 'Fins',
+      price: 149.99
+    },
+    {
+      name: 'Mares Avanti Quattro+ Fins',
+      description: 'Split fin design with four channels for efficient propulsion',
+      brand: 'Mares',
+      category: 'Fins',
       price: 179.99
     },
     {
-      name: 'Hiking Pants',
-      description: 'Quick-dry hiking pants with zip-off legs',
-      brand: 'WeatherGear',
-      category: 'Clothing',
+      name: 'Aqualung Blades Fins',
+      description: 'Channeled blade design with comfortable foot pocket for all divers',
+      brand: 'Aqualung',
+      category: 'Fins',
+      price: 129.99
+    },
+
+    // Masks
+    {
+      name: 'ScubaPro Solo Mask',
+      description: 'Low-volume mask with tempered glass and comfortable silicone skirt',
+      brand: 'ScubaPro',
+      category: 'Masks',
       price: 89.99
     },
     {
-      name: 'Base Layer Set',
-      description: 'Merino wool base layer set for temperature regulation',
-      brand: 'WeatherGear',
-      category: 'Clothing',
-      price: 119.99
+      name: 'Cressi Big Eyes Evolution Mask',
+      description: 'Large lens mask with panoramic view and comfortable fit',
+      brand: 'Cressi',
+      category: 'Masks',
+      price: 79.99
+    },
+    {
+      name: 'Mares X-Vision Mask',
+      description: 'Ultra-low volume mask with excellent field of vision',
+      brand: 'Mares',
+      category: 'Masks',
+      price: 99.99
+    },
+    {
+      name: 'Aqualung Look 2 Mask',
+      description: 'Classic design mask with comfortable fit and clear visibility',
+      brand: 'Aqualung',
+      category: 'Masks',
+      price: 69.99
+    },
+
+    // Snorkels
+    {
+      name: 'ScubaPro Escape Snorkel',
+      description: 'Dry snorkel with splash guard and flexible tube for comfort',
+      brand: 'ScubaPro',
+      category: 'Snorkels',
+      price: 49.99
+    },
+    {
+      name: 'Cressi Supernova Dry Snorkel',
+      description: 'Dry snorkel with flexible tube and comfortable mouthpiece',
+      brand: 'Cressi',
+      category: 'Snorkels',
+      price: 39.99
+    },
+    {
+      name: 'Mares Ergo Dry Snorkel',
+      description: 'Ergonomic dry snorkel with anatomical mouthpiece design',
+      brand: 'Mares',
+      category: 'Snorkels',
+      price: 44.99
+    },
+
+    // Dive Computers
+    {
+      name: 'ScubaPro Aladin 2G Dive Computer',
+      description: 'Advanced dive computer with air integration and wireless connectivity',
+      brand: 'ScubaPro',
+      category: 'Dive Computers',
+      price: 899.99
+    },
+    {
+      name: 'Cressi Leonardo Dive Computer',
+      description: 'User-friendly dive computer with large display and intuitive interface',
+      brand: 'Cressi',
+      category: 'Dive Computers',
+      price: 299.99
+    },
+    {
+      name: 'Mares Puck Pro Dive Computer',
+      description: 'Compact dive computer with multiple gas capability and clear display',
+      brand: 'Mares',
+      category: 'Dive Computers',
+      price: 399.99
+    },
+    {
+      name: 'Aqualung i300C Dive Computer',
+      description: 'Color display dive computer with air integration and compass',
+      brand: 'Aqualung',
+      category: 'Dive Computers',
+      price: 649.99
+    },
+
+    // Accessories
+    {
+      name: 'ScubaPro Nova 800 Dive Light',
+      description: 'High-powered LED dive light with multiple brightness settings',
+      brand: 'ScubaPro',
+      category: 'Accessories',
+      price: 299.99
+    },
+    {
+      name: 'Cressi Compact SMB',
+      description: 'Compact surface marker buoy for safety and signaling',
+      brand: 'Cressi',
+      category: 'Accessories',
+      price: 29.99
+    },
+    {
+      name: 'Mares Ergo Knife',
+      description: 'Ergonomic dive knife with secure sheath and comfortable grip',
+      brand: 'Mares',
+      category: 'Accessories',
+      price: 79.99
+    },
+    {
+      name: 'Aqualung Storm Whistle',
+      description: 'Loud safety whistle for emergency signaling on the surface',
+      brand: 'Aqualung',
+      category: 'Accessories',
+      price: 19.99
+    },
+
+    // Weight Systems
+    {
+      name: 'ScubaPro Weight Belt',
+      description: 'Comfortable weight belt with quick-release buckle system',
+      brand: 'ScubaPro',
+      category: 'Weight Systems',
+      price: 49.99
+    },
+    {
+      name: 'Cressi Weight Pockets',
+      description: 'Integrated weight pockets for BCD with quick-release system',
+      brand: 'Cressi',
+      category: 'Weight Systems',
+      price: 39.99
+    },
+    {
+      name: 'Mares Ankle Weights',
+      description: 'Adjustable ankle weights for improved trim and positioning',
+      brand: 'Mares',
+      category: 'Weight Systems',
+      price: 34.99
+    },
+
+    // Training Equipment
+    {
+      name: 'ScubaPro Training BCD',
+      description: 'Durable BCD designed for training and rental operations',
+      brand: 'ScubaPro',
+      category: 'Training Equipment',
+      price: 299.99
+    },
+    {
+      name: 'Cressi Training Regulator',
+      description: 'Reliable regulator set perfect for training and certification courses',
+      brand: 'Cressi',
+      category: 'Training Equipment',
+      price: 249.99
+    },
+    {
+      name: 'Mares Training Fins',
+      description: 'Affordable fins designed for training and beginner divers',
+      brand: 'Mares',
+      category: 'Training Equipment',
+      price: 89.99
     }
   ];
 
@@ -193,7 +350,7 @@ async function addSampleProducts() {
     console.log(`Added: ${product.name} (${product.brand}) - $${product.price}`);
   }
 
-  console.log('Sample products added successfully!');
+  console.log('Scuba diving gear products added successfully!');
 }
 
 addSampleProducts().catch(console.error);

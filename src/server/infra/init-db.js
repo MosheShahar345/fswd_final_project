@@ -123,11 +123,13 @@ async function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       trip_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
+      order_id INTEGER,
       status TEXT DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'waitlist', 'cancelled')),
       paid_amount DECIMAL(10,2) NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (trip_id) REFERENCES trips (id),
-      FOREIGN KEY (user_id) REFERENCES users (id)
+      FOREIGN KEY (user_id) REFERENCES users (id),
+      FOREIGN KEY (order_id) REFERENCES orders (id)
     );
 
     DROP TABLE IF EXISTS courses;
@@ -160,11 +162,13 @@ async function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
+      order_id INTEGER,
       status TEXT DEFAULT 'enrolled' CHECK (status IN ('enrolled', 'waitlist', 'dropped', 'cancelled')),
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (session_id) REFERENCES course_sessions (id),
-      FOREIGN KEY (user_id) REFERENCES users (id)
+      FOREIGN KEY (user_id) REFERENCES users (id),
+      FOREIGN KEY (order_id) REFERENCES orders (id)
     );
 
     CREATE TABLE IF NOT EXISTS messages (
@@ -199,6 +203,21 @@ async function initDatabase() {
       diff_json TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (actor_user_id) REFERENCES users (id)
+    );
+
+    CREATE TABLE IF NOT EXISTS refunds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      enrollment_id INTEGER NOT NULL,
+      course_id INTEGER NOT NULL,
+      amount DECIMAL(10,2) NOT NULL,
+      reason TEXT NOT NULL,
+      status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'processed', 'rejected')),
+      processed_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users (id),
+      FOREIGN KEY (enrollment_id) REFERENCES enrollments (id),
+      FOREIGN KEY (course_id) REFERENCES courses (id)
     );
   `);
 

@@ -50,7 +50,13 @@ export class AuthService {
     const tokens = generateTokens(user.id);
     
     return {
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        profilePicture: user.profile_picture 
+      },
       ...tokens
     };
   }
@@ -59,7 +65,7 @@ export class AuthService {
     const db = await getDb();
     
     const user = await db.get(
-      'SELECT id, name, email, role, status, created_at FROM users WHERE id = ?',
+      'SELECT id, name, email, role, status, created_at, profile_picture FROM users WHERE id = ?',
       [userId]
     );
 
@@ -75,7 +81,13 @@ export class AuthService {
     ]);
 
     return {
-      ...user,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      created_at: user.created_at,
+      profilePicture: user.profile_picture,
       summaries: {
         orders: orderCount.count,
         bookings: bookingCount.count,

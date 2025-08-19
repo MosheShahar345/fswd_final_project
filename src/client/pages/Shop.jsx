@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import QuickViewModal from '../components/QuickViewModal.jsx';
 import './Shop.css';
@@ -17,6 +18,7 @@ const Shop = () => {
   const [stats, setStats] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const { showSuccess, showError } = useNotification();
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const observerRef = useRef();
@@ -237,15 +239,19 @@ const Shop = () => {
   };
 
   const handleAddToCart = (product, quantity) => {
-    addToCart(product, quantity);
-    // Show a brief success message (you could add a toast notification here)
+    try {
+      addToCart(product, quantity);
+      showSuccess(`${product.name} added to cart!`);
+    } catch (error) {
+      showError(`Failed to add ${product.name} to cart: ${error.message}`);
+    }
   };
 
   return (
     <div className="shop shop-page">
       <div className="shop-header">
-        <h1>Shop Gear</h1>
-        <p>Find the perfect equipment for your next adventure</p>
+        <h1>Diving Equipment</h1>
+        <p>Professional diving gear and equipment for all underwater adventures from top brands worldwide</p>
         {stats && (
           <div className="shop-stats">
             <span>{stats.total_products} Products</span>

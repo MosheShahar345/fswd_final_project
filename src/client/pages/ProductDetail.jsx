@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import { getProductImage } from '../utils/productImages.js';
 import './ProductDetail.css';
 
@@ -8,6 +9,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { showSuccess, showError } = useNotification();
   
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,8 +44,12 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product && quantity > 0) {
-      addToCart(product, quantity);
-      // You could add a toast notification here
+      try {
+        addToCart(product, quantity);
+        showSuccess(`${product.name} added to cart!`);
+      } catch (error) {
+        showError(`Failed to add ${product.name} to cart: ${error.message}`);
+      }
     }
   };
 

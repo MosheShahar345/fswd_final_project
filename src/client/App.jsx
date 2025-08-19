@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
-import { CartProvider } from './contexts/CartContext.jsx';
+import { CartProvider, useCart } from './contexts/CartContext.jsx';
 import { NotificationProvider } from './contexts/NotificationContext.jsx';
 import Navbar from './components/Navbar.jsx';
 import Cart from './components/Cart.jsx';
@@ -17,34 +17,44 @@ import TripDetail from './pages/TripDetail.jsx';
 import CourseDetail from './pages/CourseDetail.jsx';
 import './App.css';
 
+// Custom component to access both CartContext and useNavigate
+function AppContent() {
+  const { clearCart } = useCart();
+  const navigate = useNavigate();
+
+  return (
+    <AuthProvider clearCart={clearCart} navigate={navigate}>
+      <NotificationProvider>
+        <div className="App">
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop/product/:id" element={<ProductDetail />} />
+              <Route path="/activities" element={<Activities />} />
+              <Route path="/activities/trip/:id" element={<TripDetail />} />
+              <Route path="/activities/course/:id" element={<CourseDetail />} />
+              <Route path="/dashboard/*" element={<Dashboard />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout/success" element={<CheckoutSuccess />} />
+              <Route path="/auth" element={<Auth />} />
+            </Routes>
+          </main>
+          <Cart />
+          <Footer />
+        </div>
+      </NotificationProvider>
+    </AuthProvider>
+  );
+}
+
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <CartProvider>
-          <NotificationProvider>
-            <div className="App">
-            <Navbar />
-            <main className="main-content">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/shop/product/:id" element={<ProductDetail />} />
-                <Route path="/activities" element={<Activities />} />
-                <Route path="/activities/trip/:id" element={<TripDetail />} />
-                <Route path="/activities/course/:id" element={<CourseDetail />} />
-                <Route path="/dashboard/*" element={<Dashboard />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/checkout/success" element={<CheckoutSuccess />} />
-                <Route path="/auth" element={<Auth />} />
-              </Routes>
-            </main>
-            <Cart />
-            <Footer />
-          </div>
-        </NotificationProvider>
-        </CartProvider>
-      </AuthProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </Router>
   );
 }

@@ -13,7 +13,17 @@ export class DashboardService {
           o.total,
           o.status,
           o.created_at,
-          COUNT(oi.id) as item_count
+          (COUNT(oi.id) + (
+            SELECT COUNT(*) 
+            FROM enrollments e 
+            WHERE e.order_id = o.id
+            AND e.status = 'enrolled'
+          ) + (
+            SELECT COUNT(*) 
+            FROM trip_bookings tb 
+            WHERE tb.order_id = o.id
+            AND tb.status = 'confirmed'
+          )) as item_count
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         WHERE o.user_id = ?
@@ -52,7 +62,7 @@ export class DashboardService {
         JOIN course_sessions cs ON e.session_id = cs.id
         JOIN courses c ON cs.course_id = c.id
         JOIN users u ON cs.instructor_id = u.id
-        WHERE e.user_id = ?
+        WHERE e.user_id = ? AND e.status = 'enrolled'
         ORDER BY cs.start_at DESC
         LIMIT 10
       `, [userId]);
@@ -113,7 +123,6 @@ export class DashboardService {
       const orderStats = await db.get(`
         SELECT 
           COUNT(*) as total_orders,
-          SUM(total) as total_spent,
           COUNT(CASE WHEN status = 'delivered' THEN 1 END) as completed_orders
         FROM orders 
         WHERE user_id = ?
@@ -140,8 +149,7 @@ export class DashboardService {
       const stats = {
         orders: {
           total: orderStats?.total_orders || 0,
-          completed: orderStats?.completed_orders || 0,
-          totalSpent: orderStats?.total_spent || 0
+          completed: orderStats?.completed_orders || 0
         },
         enrollments: {
           total: enrollmentStats?.total_enrollments || 0,

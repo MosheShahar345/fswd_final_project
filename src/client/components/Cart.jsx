@@ -1,6 +1,7 @@
 import { useCart } from '../contexts/CartContext.jsx';
 import { Link } from 'react-router-dom';
 import { getProductImage } from '../utils/productImages.js';
+import { formatDate, formatDateRange } from '../utils/dateUtils.js';
 import './Cart.css';
 
 const Cart = () => {
@@ -69,7 +70,7 @@ const Cart = () => {
                       <div className="cart-item-details">
                         <h4 className="cart-item-name">{item.name}</h4>
                         <p className="cart-item-brand">Course Enrollment</p>
-                        <p className="cart-item-session">Session: {new Date(item.sessionDate).toLocaleDateString()}</p>
+                        <p className="cart-item-session">Session: {formatDate(item.sessionDate)}</p>
                         <p className="cart-item-instructor">Instructor: {item.instructorName}</p>
                       </div>
 
@@ -85,6 +86,40 @@ const Cart = () => {
 
                       <div className="cart-item-total">
                         {formatPrice(item.coursePrice)}
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (item.type === 'trip') {
+                  return (
+                    <div key={item.id} className="cart-item cart-trip-item">
+                      <div className="cart-item-image">
+                        <div className="trip-icon">🏕️</div>
+                        <div className="cart-item-price">{formatPrice(item.price)}</div>
+                      </div>
+                      
+                      <div className="cart-item-details">
+                        <h4 className="cart-item-name">{item.title}</h4>
+                        <p className="cart-item-brand">Trip Booking</p>
+                        <p className="cart-item-location">📍 {item.location}</p>
+                        <p className="cart-item-dates">
+                          {formatDateRange(item.start_date, item.end_date)}
+                        </p>
+                      </div>
+
+                      <div className="cart-item-controls">
+                        <button 
+                          onClick={() => removeFromCart(item.id, 'trip')}
+                          className="remove-btn"
+                          aria-label="Remove trip"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+
+                      <div className="cart-item-total">
+                        {formatPrice(item.price)}
                       </div>
                     </div>
                   );

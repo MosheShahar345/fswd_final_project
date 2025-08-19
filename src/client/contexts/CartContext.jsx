@@ -51,6 +51,20 @@ export const CartProvider = ({ children }) => {
         return [...prevCart, { ...item, type, quantity: 1 }];
       }
       
+      // For trip bookings, we need to check if already booked
+      if (type === 'trip') {
+        const existingBooking = prevCart.find(cartItem => 
+          cartItem.type === 'trip' && 
+          cartItem.id === item.id
+        );
+        
+        if (existingBooking) {
+          return prevCart;
+        }
+        
+        return [...prevCart, { ...item, type, quantity: 1 }];
+      }
+      
       // For products, use existing logic
       const existingItem = prevCart.find(cartItem => 
         cartItem.type === 'product' && cartItem.id === item.id
@@ -96,8 +110,8 @@ export const CartProvider = ({ children }) => {
       const item = prevCart.find(cartItem => cartItem.type === type && cartItem.id === itemId);
       if (!item) return prevCart;
 
-      // For courses, quantity is always 1
-      if (type === 'course') {
+      // For courses and trips, quantity is always 1
+      if (type === 'course' || type === 'trip') {
         return prevCart;
       }
 
@@ -123,6 +137,10 @@ export const CartProvider = ({ children }) => {
         const coursePrice = parseFloat(item.coursePrice) || 0;
         return total + coursePrice;
       }
+      if (item.type === 'trip') {
+        const tripPrice = parseFloat(item.price) || 0;
+        return total + tripPrice;
+      }
       const price = parseFloat(item.price) || 0;
       return total + (price * item.quantity);
     }, 0);
@@ -130,8 +148,8 @@ export const CartProvider = ({ children }) => {
 
   const getCartCount = () => {
     return cart.reduce((count, item) => {
-      if (item.type === 'course') {
-        return count + 1; // Courses count as 1 each
+      if (item.type === 'course' || item.type === 'trip') {
+        return count + 1; // Courses and trips count as 1 each
       }
       return count + item.quantity;
     }, 0);
@@ -157,6 +175,8 @@ export const CartProvider = ({ children }) => {
       if (item.type === 'product' && item.qty_on_hand !== undefined && item.quantity > item.qty_on_hand) {
         errors.push(`${item.name} - Only ${item.qty_on_hand} available, but ${item.quantity} in cart`);
       }
+      // Note: Courses and trips are validated on the server side during checkout
+      // as they need to check real-time availability
     });
     
     return errors;
@@ -168,6 +188,10 @@ export const CartProvider = ({ children }) => {
 
   const getCartCourses = () => {
     return cart.filter(item => item.type === 'course');
+  };
+
+  const getCartTrips = () => {
+    return cart.filter(item => item.type === 'trip');
   };
 
   const openCart = () => setIsOpen(true);
@@ -188,6 +212,7 @@ export const CartProvider = ({ children }) => {
     validateCart,
     getCartProducts,
     getCartCourses,
+    getCartTrips,
     openCart,
     closeCart
   };

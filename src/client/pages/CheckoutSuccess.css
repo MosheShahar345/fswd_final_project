@@ -137,6 +137,14 @@
   border-left: 4px solid #3b82f6;
 }
 
+.item-row.trip-item {
+  background: #f0fdf4;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  border-left: 4px solid #22c55e;
+}
+
 .item-row span:first-child {
   font-weight: 500;
   color: #374151;

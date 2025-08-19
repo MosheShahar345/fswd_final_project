@@ -314,38 +314,128 @@
 
 
 
- @media (max-width: 2000px) {
-   .activities-grid {
-     grid-template-columns: repeat(3, 1fr);
-     max-width: 1800px;
-   }
- }
+/* Responsive Design */
+@media (max-width: 2000px) {
+  .activities-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1800px;
+  }
+}
 
- @media (max-width: 1600px) {
-   .activities-grid {
-     grid-template-columns: repeat(2, 1fr);
-     max-width: 1400px;
-   }
- }
+@media (max-width: 1600px) {
+  .activities-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 1400px;
+  }
+}
 
- @media (max-width: 768px) {
-   .activities-header h1 {
-     font-size: 2rem;
-   }
-   
-   .activities-tabs {
-     flex-direction: column;
-     align-items: center;
-   }
-   
-   .tab-button {
-     width: 200px;
-   }
-   
-   .activities-grid {
-     grid-template-columns: 1fr;
-     gap: 1.5rem;
-     max-width: 700px;
-     padding: 0 1rem;
-   }
- }
+@media (max-width: 768px) {
+  .activities {
+    padding: 1rem;
+  }
+  
+  .activities-header h1 {
+    font-size: 2rem;
+  }
+  
+  .activities-header p {
+    font-size: 1rem;
+  }
+  
+  .activities-tabs {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tab-button {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .activities-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .activity-card {
+    min-height: auto;
+  }
+  
+  .activity-content {
+    padding: 1rem;
+  }
+  
+  .activity-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .activity-location,
+  .activity-dates {
+    font-size: 0.875rem;
+  }
+  
+  .activity-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .activity-price {
+    font-size: 1.5rem;
+  }
+  
+  .course-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-item {
+    padding: 0.75rem;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  
+  .courses-intro {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .activities {
+    padding: 0.75rem;
+  }
+  
+  .activities-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  .activity-content {
+    padding: 0.75rem;
+  }
+  
+  .activity-content h3 {
+    font-size: 1.125rem;
+  }
+  
+  .activity-price {
+    font-size: 1.25rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
