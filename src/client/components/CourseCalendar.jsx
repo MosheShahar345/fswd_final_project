@@ -222,16 +222,7 @@ const EventCalendar = () => {
       }
     });
     
-    // Debug: Add a test event for today if no real events
-    if (events.length === 0 && date.toDateString() === new Date().toDateString()) {
-      events.push({
-        id: 'test',
-        course: { title: 'Test Course', price: 99.99 },
-        type: 'course',
-        isEnrolled: true,
-        start_at: new Date().toISOString()
-      });
-    }
+
     
     return events;
   };

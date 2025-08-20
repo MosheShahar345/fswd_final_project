@@ -44,7 +44,7 @@ export class AdminController {
         return res.status(400).json({ error: 'Role is required' });
       }
 
-      const result = await AdminService.updateUserRole(userId, role);
+      const result = await AdminService.updateUserRole(userId, role, req.user.id);
       res.json(result);
     } catch (error) {
       next(error);

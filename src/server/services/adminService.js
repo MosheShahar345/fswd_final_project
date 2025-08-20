@@ -1,4 +1,5 @@
 import { getDb } from '../infra/db.js';
+import { ValidationError, NotFoundError } from '../middlewares/error.js';
 
 export class AdminService {
   static async getDashboardData() {
@@ -252,13 +253,18 @@ export class AdminService {
     }
   }
 
-  static async updateUserRole(userId, role) {
+  static async updateUserRole(userId, role, currentUserId) {
     const db = await getDb();
     
     try {
       const validRoles = ['member', 'admin'];
       if (!validRoles.includes(role)) {
-        throw new Error('Invalid role');
+        throw new ValidationError('Invalid role');
+      }
+
+      // Prevent admin from demoting themselves
+      if (parseInt(userId) === parseInt(currentUserId) && role === 'member') {
+        throw new ValidationError('Admins cannot change their own role to member. This action must be performed by another admin.');
       }
 
       const result = await db.run(
@@ -267,7 +273,7 @@ export class AdminService {
       );
 
       if (result.changes === 0) {
-        throw new Error('User not found');
+        throw new NotFoundError('User not found');
       }
 
       return { success: true, message: `User role updated to ${role}` };
