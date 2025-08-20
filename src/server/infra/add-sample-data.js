@@ -2,7 +2,6 @@ import { getDb } from './db.js';
 
 async function addSampleData() {
   const db = await getDb();
-  
   console.log('Adding sample dashboard data...');
 
   // Add sample orders for user 4 (member)

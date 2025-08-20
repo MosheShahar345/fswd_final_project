@@ -8,7 +8,7 @@ export const validateCourse = [
     .withMessage('Course title must be between 3 and 100 characters'),
   
   body('subtitle')
-    .optional()
+    .optional({ nullable: true, checkFalsy: true })
     .trim()
     .isLength({ max: 100 })
     .withMessage('Course subtitle must be less than 100 characters'),

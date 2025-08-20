@@ -41,8 +41,32 @@ const Shop = () => {
 
   // Debounced search effect
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchAllProducts();
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+      setCurrentPage(1);
+      
+      try {
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) params.append(key, value);
+        });
+
+        const response = await fetch(`http://localhost:3000/api/products?${params}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const productsData = data.products || data;
+        setAllProducts(productsData);
+        setDisplayedProducts(productsData.slice(0, 10));
+        setHasMore(productsData.length > 10);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to load products. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }, 300);
 
     return () => clearTimeout(timer);

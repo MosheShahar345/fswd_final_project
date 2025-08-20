@@ -62,7 +62,7 @@ export const AuthProvider = ({ children, clearCart, navigate }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
+        return { success: false, error: data.error?.message || data.error || 'Login failed' };
       }
 
       setToken(data.accessToken);
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children, clearCart, navigate }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        return { success: false, error: data.error?.message || data.error || 'Registration failed' };
       }
 
       setToken(data.accessToken);

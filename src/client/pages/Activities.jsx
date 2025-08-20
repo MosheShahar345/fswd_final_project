@@ -101,7 +101,7 @@ const Activities = () => {
     fetchCourses();
     fetchTrips();
     fetchCourseStats();
-  }, [fetchCourses, fetchTrips, fetchCourseStats]);
+  }, []); // Empty dependency array to run only once
 
   return (
     <div className="activities">
@@ -298,9 +298,9 @@ const Activities = () => {
                               : course.level === 'intermediate' && course.title === 'Advanced Open Water Diver'
                               ? 'Expand your diving horizons with advanced techniques, deep diving, and specialized underwater navigation skills.'
                               : course.level === 'advanced' && course.title === 'Master Diver'
-                              ? 'Achieve the highest recreational diving certification. Master advanced skills, rescue techniques, and become a leader in the diving community.'
+                              ? 'Achieve the highest recreational diving certification. Master advanced skills and rescue techniques.'
                               : course.level === 'professional' && course.title === 'Divemaster'
-                              ? 'Begin your professional diving career. Learn to lead dives, assist instructors, and become a certified diving professional.'
+                              ? 'Begin your professional diving career. Learn to lead dives and become a certified diving professional.'
                               : course.description
                             }
                           </p>

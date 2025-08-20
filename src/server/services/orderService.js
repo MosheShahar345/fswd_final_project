@@ -1,5 +1,6 @@
 import { getDb } from '../infra/db.js';
 import { logger } from '../utils/logger.js';
+import { ConflictError, ValidationError } from '../middlewares/error.js';
 
 export class OrderService {
   static async createOrder(userId, orderData) {
@@ -59,7 +60,7 @@ export class OrderService {
           `, [userId, course.sessionId]);
 
           if (existingEnrollment) {
-            throw new Error('Already enrolled in this course session');
+            throw new ConflictError('You are already enrolled in this course session');
           }
 
           // Check session capacity
@@ -168,22 +169,21 @@ export class OrderService {
       `, [orderId]);
 
       // Get course enrollments for this order
-      const courseEnrollments = await db.all(`
+      const enrollments = await db.all(`
         SELECT 
           e.id,
           e.status,
           e.created_at,
-          c.title as course_name,
+          c.title as course_title,
+          c.subtitle as course_subtitle,
           c.level as course_level,
           c.price as course_price,
-          cs.start_at as session_start,
-          u.name as instructor_name
+          cs.start_at,
+          cs.capacity
         FROM enrollments e
         JOIN course_sessions cs ON e.session_id = cs.id
         JOIN courses c ON cs.course_id = c.id
-        JOIN users u ON cs.instructor_id = u.id
-        WHERE e.order_id = ? 
-        AND e.status = 'enrolled'
+        WHERE e.order_id = ?
       `, [orderId]);
 
       // Get trip bookings for this order
@@ -210,7 +210,7 @@ export class OrderService {
       return {
         order,
         items: orderItems,
-        courses: courseEnrollments,
+        courses: enrollments,
         trips: tripBookings
       };
     } catch (error) {

@@ -152,12 +152,7 @@ const Checkout = () => {
         }))
       };
 
-      console.log('Order data being sent:', orderData);
-      console.log('Cart contents:', cart);
-      console.log('Items count:', orderData.items?.length || 0);
-      console.log('Courses count:', orderData.courses?.length || 0);
-      console.log('Trips count:', orderData.trips?.length || 0);
-      console.log('Total items:', (orderData.items?.length || 0) + (orderData.courses?.length || 0) + (orderData.trips?.length || 0));
+
 
       // Create order in database
       const response = await fetch('http://localhost:3000/api/orders', {
@@ -172,7 +167,24 @@ const Checkout = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Checkout error response:', errorData);
-        const errorMessage = errorData.error || errorData.message || JSON.stringify(errorData) || 'Failed to create order';
+        console.error('Error details:', JSON.stringify(errorData, null, 2));
+        
+        // Extract the most detailed error message available
+        let errorMessage = 'Failed to create order';
+        if (errorData.error) {
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
+          } else if (errorData.error.message) {
+            errorMessage = errorData.error.message;
+          } else if (errorData.error.details) {
+            errorMessage = errorData.error.details;
+          }
+        } else if (errorData.details) {
+          errorMessage = errorData.details;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
         throw new Error(errorMessage);
       }
 
@@ -183,7 +195,7 @@ const Checkout = () => {
       navigate(`/checkout/success?orderId=${result.orderId}`);
     } catch (error) {
       console.error('Order processing failed:', error);
-      showError('There was an error processing your order. Please try again.');
+      showError(error.message || 'There was an error processing your order. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -353,7 +365,7 @@ const Checkout = () => {
                 <h3>Products</h3>
                 <div className="cart-items">
                   {products.map((item) => (
-                    <div key={item.id} className="cart-item">
+                    <div key={`product-${item.id}`} className="cart-item">
                       <div className="item-info">
                         <h4>{item.name}</h4>
                         <p>Qty: {item.quantity}</p>
@@ -373,11 +385,10 @@ const Checkout = () => {
                 <h3>Course Enrollments</h3>
                 <div className="cart-items">
                   {courses.map((item) => (
-                    <div key={item.id} className="cart-item course-item">
+                    <div key={`course-${item.id}`} className="cart-item course-item">
                       <div className="item-info">
                         <h4>🎓 {item.name}</h4>
                         <p>Session: {formatDate(item.sessionDate)}</p>
-                        <p>Instructor: {item.instructorName}</p>
                       </div>
                       <div className="item-price">
                         {formatPrice(item.coursePrice)}
@@ -394,7 +405,7 @@ const Checkout = () => {
                 <h3>Trip Bookings</h3>
                 <div className="cart-items">
                   {trips.map((item) => (
-                    <div key={item.id} className="cart-item trip-item">
+                    <div key={`trip-${item.id}`} className="cart-item trip-item">
                       <div className="item-info">
                         <h4>🏕️ {item.title}</h4>
                         <p>📍 {item.location}</p>

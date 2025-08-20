@@ -2,7 +2,6 @@ import { getDb } from './db.js';
 
 async function addSampleProducts() {
   const db = await getDb();
-  
   console.log('Adding scuba diving gear products...');
 
   const products = [
@@ -349,7 +348,7 @@ async function addSampleProducts() {
 
     console.log(`Added: ${product.name} (${product.brand}) - $${product.price}`);
   }
-
+  
   console.log('Scuba diving gear products added successfully!');
 }
 

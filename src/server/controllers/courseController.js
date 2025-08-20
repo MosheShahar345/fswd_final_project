@@ -15,7 +15,10 @@ import {
 export const getAllCourses = async (req, res) => {
   try {
     const { level, search, sort = 'title', order = 'asc' } = req.query;
-    const courses = await getAllCoursesService({ level, search, sort, order });
+    // Check if this is an admin request (from /admin/all route)
+    const includeInactive = req.route.path === '/admin/all';
+    
+    const courses = await getAllCoursesService({ level, search, sort, order, includeInactive });
     
     res.json({
       success: true,

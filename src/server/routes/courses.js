@@ -11,7 +11,7 @@ import {
   getEnrollments,
   cancelEnrollment
 } from '../controllers/courseController.js';
-import { authenticateToken } from '../middlewares/auth.js';
+import { authenticateToken, requireRole } from '../middlewares/auth.js';
 import { validateCourse, validateEnrollment } from '../validators/courses.js';
 
 const router = express.Router();
@@ -23,9 +23,10 @@ router.get('/stats', getCourseStats);
 router.get('/:id', getCourseById);
 
 // Protected routes
-router.post('/', authenticateToken, validateCourse, createCourse);
-router.put('/:id', authenticateToken, validateCourse, updateCourse);
-router.delete('/:id', authenticateToken, deleteCourse);
+router.get('/admin/all', authenticateToken, requireRole(['admin']), getAllCourses);
+router.post('/', authenticateToken, requireRole(['admin']), validateCourse, createCourse);
+router.patch('/:id', authenticateToken, requireRole(['admin']), validateCourse, updateCourse);
+router.delete('/:id', authenticateToken, requireRole(['admin']), deleteCourse);
 
 // Enrollment routes
 router.post('/:id/enroll', authenticateToken, validateEnrollment, enrollInCourse);

@@ -9,6 +9,10 @@ import Home from './pages/Home.jsx';
 import Shop from './pages/Shop.jsx';
 import Activities from './pages/Activities.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminProducts from './pages/AdminProducts.jsx';
+import AdminCourses from './pages/AdminCourses.jsx';
+import AdminTrips from './pages/AdminTrips.jsx';
 import Checkout from './pages/Checkout.jsx';
 import CheckoutSuccess from './pages/CheckoutSuccess.jsx';
 import Auth from './pages/Auth.jsx';
@@ -36,6 +40,10 @@ function AppContent() {
               <Route path="/activities/trip/:id" element={<TripDetail />} />
               <Route path="/activities/course/:id" element={<CourseDetail />} />
               <Route path="/dashboard/*" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/courses" element={<AdminCourses />} />
+              <Route path="/admin/trips" element={<AdminTrips />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/success" element={<CheckoutSuccess />} />
               <Route path="/auth" element={<Auth />} />

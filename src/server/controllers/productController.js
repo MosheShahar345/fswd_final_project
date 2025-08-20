@@ -278,4 +278,49 @@ export class ProductController {
       throw new DatabaseError('Failed to fetch product statistics');
     }
   });
+
+  static deleteProduct = asyncHandler(async (req, res) => {
+    const startTime = Date.now();
+    const productId = parseInt(req.params.id);
+    
+    if (!productId || isNaN(productId)) {
+      throw new ValidationError('Invalid product ID', 'id');
+    }
+    
+    try {
+      logger.info('Deleting product', {
+        requestId: req.id,
+        productId,
+        userId: req.user?.id || 'anonymous',
+        ip: req.ip
+      });
+      
+      await ProductService.deleteProduct(productId);
+      
+      const responseTime = Date.now() - startTime;
+      logger.info('Product deleted successfully', {
+        requestId: req.id,
+        productId,
+        responseTime: `${responseTime}ms`
+      });
+      
+      res.status(200).json({
+        success: true,
+        message: 'Product deleted successfully'
+      });
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+      logger.error('Failed to delete product', {
+        requestId: req.id,
+        productId,
+        error: error.message,
+        responseTime: `${responseTime}ms`
+      });
+      
+      if (error.message === 'Product not found') {
+        throw new NotFoundError('Product');
+      }
+      throw error;
+    }
+  });
 }

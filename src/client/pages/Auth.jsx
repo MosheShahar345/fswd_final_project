@@ -84,6 +84,13 @@ const Auth = () => {
 
   return (
     <div className="auth-page">
+      {/* Animated Background Orbs */}
+      <div className="auth-background">
+        <div className="auth-orb auth-orb-1"></div>
+        <div className="auth-orb auth-orb-2"></div>
+        <div className="auth-orb auth-orb-3"></div>
+      </div>
+      
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">

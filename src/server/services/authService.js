@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { getDb } from '../infra/db.js';
 import { generateTokens } from '../middlewares/auth.js';
+import { AuthenticationError, ConflictError, NotFoundError } from '../middlewares/error.js';
 
 export class AuthService {
   static async register(userData) {
@@ -9,7 +10,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [userData.email]);
     if (existingUser) {
-      throw new Error('User already exists with this email');
+      throw new ConflictError('User already exists with this email');
     }
 
     // Hash password
@@ -35,16 +36,22 @@ export class AuthService {
     
     const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new AuthenticationError('Invalid credentials');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.hash);
     if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+      throw new AuthenticationError('Invalid credentials');
     }
 
     if (user.status !== 'active') {
-      throw new Error('Account is not active');
+      if (user.status === 'suspended') {
+        throw new AuthenticationError('Your account has been suspended. Please contact support for assistance.');
+      } else if (user.status === 'inactive') {
+        throw new AuthenticationError('Your account is inactive. Please contact support to reactivate your account.');
+      } else {
+        throw new AuthenticationError('Your account is not active. Please contact support for assistance.');
+      }
     }
 
     const tokens = generateTokens(user.id);
@@ -70,7 +77,7 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     // Get user summaries for dashboard

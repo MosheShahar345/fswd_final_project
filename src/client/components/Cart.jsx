@@ -59,9 +59,8 @@ const Cart = () => {
             <div className="cart-items">
               {cart.map((item) => {
                 if (item.type === 'course') {
-                  console.log('Course item in cart:', item);
                   return (
-                    <div key={item.id} className="cart-item cart-course-item">
+                    <div key={`course-${item.id}`} className="cart-item cart-course-item">
                       <div className="cart-item-image">
                         <div className="course-icon">🎓</div>
                         <div className="cart-item-price">{formatPrice(item.coursePrice)}</div>
@@ -71,7 +70,6 @@ const Cart = () => {
                         <h4 className="cart-item-name">{item.name}</h4>
                         <p className="cart-item-brand">Course Enrollment</p>
                         <p className="cart-item-session">Session: {formatDate(item.sessionDate)}</p>
-                        <p className="cart-item-instructor">Instructor: {item.instructorName}</p>
                       </div>
 
                       <div className="cart-item-controls">
@@ -93,7 +91,7 @@ const Cart = () => {
 
                 if (item.type === 'trip') {
                   return (
-                    <div key={item.id} className="cart-item cart-trip-item">
+                    <div key={`trip-${item.id}`} className="cart-item cart-trip-item">
                       <div className="cart-item-image">
                         <div className="trip-icon">🏕️</div>
                         <div className="cart-item-price">{formatPrice(item.price)}</div>
@@ -131,7 +129,7 @@ const Cart = () => {
                 const imageUrl = primaryImage ? primaryImage.url : placeholderImage.url;
                 
                 return (
-                  <div key={item.id} className="cart-item">
+                  <div key={`product-${item.id}`} className="cart-item">
                     <div className="cart-item-image">
                       <img src={imageUrl} alt={item.name} />
                       <div className="cart-item-price">{formatPrice(item.price)}</div>

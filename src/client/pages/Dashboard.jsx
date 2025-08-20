@@ -115,7 +115,7 @@ const Dashboard = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || errorData.message || 'Failed to cancel enrollment');
+        throw new Error(errorData.error?.message || errorData.error || errorData.message || 'Failed to cancel enrollment');
       }
 
       const result = await response.json();
@@ -280,9 +280,8 @@ const Dashboard = () => {
                         {getStatusBadge(enrollment.status)}
                       </div>
                       <div className="item-details">
-                        <p><strong>Level:</strong> {enrollment.course_level}</p>
-                        <p><strong>Instructor:</strong> {enrollment.instructor_name}</p>
-                        <p><strong>Start Date:</strong> {formatDate(enrollment.session_start)}</p>
+                        <p><strong>Course:</strong> {enrollment.course_title}</p>
+                        <p><strong>Start Date:</strong> {formatDate(enrollment.start_at)}</p>
                         {enrollment.status === 'enrolled' && canCancelEnrollment(enrollment.session_start) && (
                           <div className="enrollment-actions">
                             <button
@@ -372,10 +371,8 @@ const Dashboard = () => {
                       {getStatusBadge(enrollment.status)}
                     </div>
                     <div className="item-details">
-                      <p><strong>Level:</strong> {enrollment.course_level}</p>
-                      <p><strong>Price:</strong> {formatCurrency(enrollment.course_price)}</p>
-                      <p><strong>Instructor:</strong> {enrollment.instructor_name}</p>
-                      <p><strong>Start Date:</strong> {formatDate(enrollment.session_start)}</p>
+                      <p><strong>Course:</strong> {enrollment.course_title}</p>
+                      <p><strong>Start Date:</strong> {formatDate(enrollment.start_at)}</p>
                       <p><strong>Enrolled:</strong> {formatDate(enrollment.created_at)}</p>
                       {enrollment.status === 'enrolled' && canCancelEnrollment(enrollment.session_start) && (
                         <div className="enrollment-actions">

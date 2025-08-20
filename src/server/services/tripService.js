@@ -121,4 +121,94 @@ export class TripService {
       throw error;
     }
   }
+
+  static async createTrip(tripData) {
+    const startTime = Date.now();
+    const db = await getDb();
+
+    try {
+      const { title, description, location, start_date, end_date, difficulty, price, seats_total } = tripData;
+
+      const result = await db.run(`
+        INSERT INTO trips (title, description, location, start_date, end_date, difficulty, price, seats_total, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+      `, [title, description, location, start_date, end_date, difficulty, price, seats_total]);
+
+      const trip = await db.get(`
+        SELECT * FROM trips WHERE id = ?
+      `, [result.lastID]);
+
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('INSERT', 'trip', duration, true);
+
+      return trip;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('INSERT', 'trip', duration, false, error);
+      throw new Error('Failed to create trip');
+    }
+  }
+
+  static async updateTrip(id, tripData) {
+    const startTime = Date.now();
+    const db = await getDb();
+
+    try {
+      const { title, description, location, start_date, end_date, difficulty, price, seats_total } = tripData;
+
+      await db.run(`
+        UPDATE trips 
+        SET title = ?, description = ?, location = ?, start_date = ?, end_date = ?, 
+            difficulty = ?, price = ?, seats_total = ?
+        WHERE id = ?
+      `, [title, description, location, start_date, end_date, difficulty, price, seats_total, id]);
+
+      const trip = await db.get(`
+        SELECT * FROM trips WHERE id = ?
+      `, [id]);
+
+      if (!trip) {
+        throw new Error('Trip not found');
+      }
+
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('UPDATE', 'trip', duration, true);
+
+      return trip;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('UPDATE', 'trip', duration, false, error);
+      throw new Error('Failed to update trip');
+    }
+  }
+
+  static async deleteTrip(id) {
+    const startTime = Date.now();
+    const db = await getDb();
+
+    try {
+      // Check if trip exists
+      const trip = await db.get(`
+        SELECT id FROM trips WHERE id = ?
+      `, [id]);
+
+      if (!trip) {
+        throw new Error('Trip not found');
+      }
+
+      // Soft delete by setting active = 0
+      await db.run(`
+        UPDATE trips SET active = 0 WHERE id = ?
+      `, [id]);
+
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('DELETE', 'trip', duration, true);
+
+      return true;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.logDbOperation('DELETE', 'trip', duration, false, error);
+      throw new Error('Failed to delete trip');
+    }
+  }
 }

@@ -2,6 +2,7 @@ import express from 'express';
 import { AuthController } from '../controllers/authController.js';
 import { authenticateToken } from '../middlewares/auth.js';
 import { registerSchema, loginSchema } from '../validators/auth.js';
+import { ValidationError } from '../middlewares/error.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const validate = (schema) => (req, res, next) => {
     schema.parse(req.body);
     next();
   } catch (error) {
-    res.status(400).json({ error: error.errors[0].message });
+    next(new ValidationError(error.errors[0].message));
   }
 };
 

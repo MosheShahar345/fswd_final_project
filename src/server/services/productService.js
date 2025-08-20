@@ -278,4 +278,33 @@ export class ProductService {
       };
     }
   }
+
+  static async deleteProduct(id) {
+    const db = await getDb();
+    
+    if (!id || isNaN(parseInt(id))) {
+      throw new Error('Invalid product ID');
+    }
+    
+    try {
+      // Check if product exists
+      const product = await db.get('SELECT id FROM products WHERE id = ? AND active = 1', [parseInt(id)]);
+      
+      if (!product) {
+        throw new Error('Product not found');
+      }
+      
+      // Soft delete by setting active = 0
+      const result = await db.run('UPDATE products SET active = 0 WHERE id = ?', [parseInt(id)]);
+      
+      if (result.changes === 0) {
+        throw new Error('Product not found');
+      }
+      
+      return { success: true, message: 'Product deleted successfully' };
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
+  }
 }

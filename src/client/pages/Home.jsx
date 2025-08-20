@@ -134,7 +134,7 @@ const Home = () => {
         <div className="highlight-strip">
           <div className="highlight-content">
             <h2 className="highlight-title">Next Courses</h2>
-            <p className="highlight-description">Learn from expert instructors</p>
+            <p className="highlight-description">Learn from expert professionals</p>
             <Link to="/activities?tab=courses" className="btn btn-primary highlight-btn">
               <span>Enroll Now</span>
               <div className="btn-ripple"></div>

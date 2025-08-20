@@ -1,4 +1,5 @@
 import { AuthService } from '../services/authService.js';
+import { generateTokens } from '../middlewares/auth.js';
 
 export class AuthController {
   static async register(req, res, next) {

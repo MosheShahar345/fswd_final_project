@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 
 async function initDatabase() {
   const db = await getDb();
-  
   console.log('Initializing database...');
 
   // Create tables
@@ -13,8 +12,9 @@ async function initDatabase() {
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       hash TEXT NOT NULL,
-      role TEXT DEFAULT 'member' CHECK (role IN ('member', 'instructor', 'manager', 'admin')),
+      role TEXT DEFAULT 'member' CHECK (role IN ('member', 'admin')),
       status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+      profile_picture TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -89,7 +89,7 @@ async function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       total DECIMAL(10,2) NOT NULL,
-      status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'shipped', 'delivered', 'cancelled', 'refunded')),
+      status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'shipped', 'delivered', 'cancelled', 'refunded', 'SENT')),
       payment_id TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users (id)
@@ -151,11 +151,9 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS course_sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       course_id INTEGER NOT NULL,
-      instructor_id INTEGER NOT NULL,
       start_at DATETIME NOT NULL,
       capacity INTEGER NOT NULL,
-      FOREIGN KEY (course_id) REFERENCES courses (id),
-      FOREIGN KEY (instructor_id) REFERENCES users (id)
+      FOREIGN KEY (course_id) REFERENCES courses (id)
     );
 
     CREATE TABLE IF NOT EXISTS enrollments (
@@ -232,17 +230,7 @@ async function initDatabase() {
 
   await db.run(`
     INSERT OR IGNORE INTO users (id, name, email, hash, role) 
-    VALUES (2, 'John Instructor', 'instructor@adventuregear.com', ?, 'instructor')
-  `, [userHash]);
-
-  await db.run(`
-    INSERT OR IGNORE INTO users (id, name, email, hash, role) 
-    VALUES (3, 'Jane Manager', 'manager@adventuregear.com', ?, 'manager')
-  `, [userHash]);
-
-  await db.run(`
-    INSERT OR IGNORE INTO users (id, name, email, hash, role) 
-    VALUES (4, 'Bob Member', 'member@adventuregear.com', ?, 'member')
+    VALUES (2, 'John Member', 'member@adventuregear.com', ?, 'member')
   `, [userHash]);
 
   // Sample products
@@ -291,7 +279,7 @@ async function initDatabase() {
   // Sample diving courses
   await db.run(`
     INSERT OR IGNORE INTO courses (id, title, subtitle, level, price, description, duration, prerequisites, max_depth) 
-    VALUES (1, 'Open Water Diver', 'One Star Diver', 'beginner', 599.99, 'The One Star Diver class teaches the effects of the underwater environment on the human body, and instills in the diver the correct guidelines and proper techniques for the aquatic realm, which will enable them to perform safe and enjoyable dives.', '3-4 days', 'None (10+ years old)', '18m (60ft)')
+    VALUES (1, 'Open Water Diver', 'One Star Diver', 'beginner', 599.99, 'The One Star Diver class teaches the effects of the underwater environment on the human body, and instills in the diver the correct guidelines and proper techniques for the aquatic realm, which will enable them to perform safe and enjoyable dives.', '5 days', 'None (10+ years old)', '20m (65ft)')
   `);
 
   await db.run(`
@@ -311,28 +299,28 @@ async function initDatabase() {
 
   // Sample diving course sessions
   await db.run(`
-    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (1, 1, 2, '2024-06-15 09:00:00', 12)
+    INSERT OR IGNORE INTO course_sessions (id, course_id, start_at, capacity) 
+    VALUES (1, 1, '2024-06-15 09:00:00', 12)
   `);
 
   await db.run(`
-    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (2, 1, 2, '2024-07-01 09:00:00', 12)
+    INSERT OR IGNORE INTO course_sessions (id, course_id, start_at, capacity) 
+    VALUES (2, 1, '2024-07-01 09:00:00', 12)
   `);
 
   await db.run(`
-    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (3, 2, 2, '2024-06-20 14:00:00', 8)
+    INSERT OR IGNORE INTO course_sessions (id, course_id, start_at, capacity) 
+    VALUES (3, 2, '2024-06-20 14:00:00', 8)
   `);
 
   await db.run(`
-    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (4, 3, 2, '2024-07-10 09:00:00', 6)
+    INSERT OR IGNORE INTO course_sessions (id, course_id, start_at, capacity) 
+    VALUES (4, 3, '2024-07-10 09:00:00', 6)
   `);
 
   await db.run(`
-    INSERT OR IGNORE INTO course_sessions (id, course_id, instructor_id, start_at, capacity) 
-    VALUES (5, 4, 2, '2024-08-01 09:00:00', 4)
+    INSERT OR IGNORE INTO course_sessions (id, course_id, start_at, capacity) 
+    VALUES (5, 4, '2024-08-01 09:00:00', 4)
   `);
 
   console.log('Database initialized successfully!');

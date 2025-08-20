@@ -12,6 +12,7 @@ import orderRoutes from './routes/orders.js';
 import tripRoutes from './routes/trips.js';
 import refundRoutes from './routes/refunds.js';
 import profileRoutes from './routes/profile.js';
+import adminRoutes from './routes/admin.js';
 import { errorHandler, notFound } from './middlewares/error.js';
 import { requestLogger, securityLogger, rateLimitLogger, errorLogger } from './middlewares/logging.js';
 import { logger } from './utils/logger.js';
@@ -125,6 +126,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/refunds', refundRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', notFound);

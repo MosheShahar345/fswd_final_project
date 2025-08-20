@@ -2,6 +2,7 @@ import express from 'express';
 import { ProductController } from '../controllers/productController.js';
 import { authenticateToken, requireRole } from '../middlewares/auth.js';
 import { createProductSchema, updateProductSchema } from '../validators/products.js';
+import { ValidationError } from '../middlewares/error.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const validate = (schema) => (req, res, next) => {
     schema.parse(req.body);
     next();
   } catch (error) {
-    res.status(400).json({ error: error.errors[0].message });
+    next(new ValidationError(error.errors[0].message));
   }
 };
 
@@ -22,8 +23,9 @@ router.get('/brands', ProductController.getBrands);
 router.get('/stats', ProductController.getProductStats);
 router.get('/:id', ProductController.getProduct);
 
-// Protected routes (manager/admin only)
-router.post('/', authenticateToken, requireRole(['manager', 'admin']), validate(createProductSchema), ProductController.createProduct);
-router.patch('/:id', authenticateToken, requireRole(['manager', 'admin']), validate(updateProductSchema), ProductController.updateProduct);
+// Protected routes (admin only)
+router.post('/', authenticateToken, requireRole(['admin']), validate(createProductSchema), ProductController.createProduct);
+router.patch('/:id', authenticateToken, requireRole(['admin']), validate(updateProductSchema), ProductController.updateProduct);
+router.delete('/:id', authenticateToken, requireRole(['admin']), ProductController.deleteProduct);
 
 export default router;

@@ -54,17 +54,19 @@ export class DashboardService {
           e.status,
           e.created_at,
           c.title as course_title,
-          c.level as course_level,
-          c.price as course_price,
+          c.subtitle as course_subtitle,
+          cs.start_at,
           cs.start_at as session_start,
-          u.name as instructor_name
+          cs.capacity,
+          COUNT(e2.id) as enrolled_count
         FROM enrollments e
         JOIN course_sessions cs ON e.session_id = cs.id
         JOIN courses c ON cs.course_id = c.id
-        JOIN users u ON cs.instructor_id = u.id
-        WHERE e.user_id = ? AND e.status = 'enrolled'
-        ORDER BY cs.start_at DESC
-        LIMIT 10
+        LEFT JOIN enrollments e2 ON cs.id = e2.session_id AND e2.status = 'enrolled'
+        WHERE e.user_id = ?
+        GROUP BY e.id
+        ORDER BY cs.start_at ASC
+        LIMIT 5
       `, [userId]);
 
       const duration = Date.now() - startTime;
@@ -237,13 +239,10 @@ export class DashboardService {
           c.duration,
           c.prerequisites,
           c.max_depth,
-          cs.start_at as session_start,
-          u.name as instructor_name,
-          u.email as instructor_email
+          cs.start_at as session_start
         FROM enrollments e
         JOIN course_sessions cs ON e.session_id = cs.id
         JOIN courses c ON cs.course_id = c.id
-        JOIN users u ON cs.instructor_id = u.id
         WHERE e.id = ? AND e.user_id = ?
       `, [enrollmentId, userId]);
 

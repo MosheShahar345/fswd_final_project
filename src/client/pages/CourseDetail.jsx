@@ -56,13 +56,11 @@ const CourseDetail = () => {
     }
 
     const courseItem = {
-      id: `course-${course.id}-${selectedSession.id}`,
       courseId: course.id,
       sessionId: selectedSession.id,
       name: course.title,
       coursePrice: parseFloat(course.price) || 0,
       sessionDate: selectedSession.start_at,
-      instructorName: selectedSession.instructor_name,
       level: course.level
     };
     
@@ -194,10 +192,7 @@ const CourseDetail = () => {
                   <div className="session-info">
                     <h3>Session {session.id}</h3>
                                             <p className="session-date">{formatDateTime(session.start_at)}</p>
-                    <p className="session-instructor">Instructor: {session.instructor_name}</p>
-                    <p className="session-capacity">
-                      {session.enrolled_count}/{session.capacity} enrolled
-                    </p>
+                    <p className="session-instructor">Capacity: {session.enrolled_count}/{session.capacity}</p>
                   </div>
                   <div className="session-status">
                     {session.enrolled_count >= session.capacity ? (
@@ -220,8 +215,7 @@ const CourseDetail = () => {
             <div className="enrollment-section">
               <h3>Add to Cart</h3>
                                       <p>Session {selectedSession.id} - {formatDateTime(selectedSession.start_at)}</p>
-              <p>Instructor: {selectedSession.instructor_name}</p>
-              <p>Available spots: {selectedSession.capacity - selectedSession.enrolled_count}</p>
+              <p>Capacity: {selectedSession.enrolled_count}/{selectedSession.capacity}</p>
               
               <button 
                 className="btn btn-primary enroll-btn"

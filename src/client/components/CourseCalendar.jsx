@@ -76,9 +76,7 @@ const EventCalendar = () => {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Dashboard data received:', data);
-        console.log('User enrollments:', data.recentEnrollments);
-        console.log('User trip bookings:', data.recentTripBookings);
+
         setUserEnrollments(data.recentEnrollments || []);
         setUserTripBookings(data.recentTripBookings || []);
       }
@@ -110,7 +108,8 @@ const EventCalendar = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to enroll in course');
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || errorData.error || 'Failed to enroll in course');
       }
 
       // Navigate to dashboard instead of showing alert
@@ -145,7 +144,8 @@ const EventCalendar = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to book trip');
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || errorData.error || 'Failed to book trip');
       }
 
       // Navigate to dashboard instead of showing alert
@@ -185,47 +185,32 @@ const EventCalendar = () => {
   const getEventsForDate = (date) => {
     const events = [];
     
-    console.log('Getting events for date:', date.toDateString());
-    console.log('User enrollments count:', userEnrollments.length);
-    console.log('User trip bookings count:', userTripBookings.length);
+
     
     // Add user's course enrollments
     userEnrollments.forEach(enrollment => {
-      console.log('Processing enrollment:', enrollment);
       const enrollmentDate = new Date(enrollment.session_start);
       const dateString = date.toDateString();
       const enrollmentDateString = enrollmentDate.toDateString();
       
-      console.log('Comparing dates:', enrollmentDateString, 'vs', dateString);
-      
       if (enrollmentDateString === dateString) {
-        console.log('Match found for course enrollment!');
         events.push({
           ...enrollment,
-          course: {
-            title: enrollment.course_title,
-            level: enrollment.course_level,
-            price: enrollment.course_price
-          },
+          title: enrollment.course_title,
           type: 'course',
           isEnrolled: true,
-          start_at: enrollment.session_start,
-          instructor_name: enrollment.instructor_name
+          start_at: enrollment.session_start
         });
       }
     });
     
     // Add user's trip bookings
     userTripBookings.forEach(booking => {
-      console.log('Processing booking:', booking);
       const bookingDate = new Date(booking.start_date);
       const dateString = date.toDateString();
       const bookingDateString = bookingDate.toDateString();
       
-      console.log('Comparing dates:', bookingDateString, 'vs', dateString);
-      
       if (bookingDateString === dateString) {
-        console.log('Match found for trip booking!');
         events.push({
           ...booking,
           title: booking.trip_title,
@@ -237,18 +222,14 @@ const EventCalendar = () => {
       }
     });
     
-    console.log('Total events found for this date:', events.length);
-    
     // Debug: Add a test event for today if no real events
     if (events.length === 0 && date.toDateString() === new Date().toDateString()) {
-      console.log('Adding test event for today');
       events.push({
         id: 'test',
         course: { title: 'Test Course', price: 99.99 },
         type: 'course',
         isEnrolled: true,
-        start_at: new Date().toISOString(),
-        instructor_name: 'Test Instructor'
+        start_at: new Date().toISOString()
       });
     }
     
@@ -317,7 +298,6 @@ const EventCalendar = () => {
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       if (loading) {
-        console.log('Calendar loading timeout, forcing completion');
         setLoading(false);
         // Don't set error, just continue with empty data
       }
@@ -348,7 +328,6 @@ const EventCalendar = () => {
   }
 
   if (error) {
-    console.log('Calendar error:', error);
     return (
       <div className="course-calendar">
         <div className="error">
@@ -475,8 +454,8 @@ const EventCalendar = () => {
                            <span className="detail-value">{formatTime(event.start_at)}</span>
                          </div>
                          <div className="detail-row">
-                           <span className="detail-label">Instructor:</span>
-                           <span className="detail-value">{event.instructor_name}</span>
+                           <span className="detail-label">Capacity:</span>
+                           <span className="detail-value">{event.enrolled_count}/{event.capacity}</span>
                          </div>
                        </div>
                                              <div className="event-actions">

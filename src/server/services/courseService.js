@@ -82,11 +82,8 @@ export const getAllCoursesWithSessionsService = async () => {
         cs.id,
         cs.start_at,
         cs.capacity,
-        u.name as instructor_name,
-        u.email as instructor_email,
         COUNT(e.id) as enrolled_count
       FROM course_sessions cs
-      LEFT JOIN users u ON cs.instructor_id = u.id
       LEFT JOIN enrollments e ON cs.id = e.session_id AND e.status = 'enrolled'
       WHERE cs.course_id = ? AND cs.start_at > datetime('now')
       GROUP BY cs.id
@@ -123,11 +120,8 @@ export const getCourseByIdService = async (id) => {
       cs.id,
       cs.start_at,
       cs.capacity,
-      u.name as instructor_name,
-      u.email as instructor_email,
       COUNT(e.id) as enrolled_count
     FROM course_sessions cs
-    LEFT JOIN users u ON cs.instructor_id = u.id
     LEFT JOIN enrollments e ON cs.id = e.session_id AND e.status = 'enrolled'
     WHERE cs.course_id = ? AND cs.start_at > datetime('now')
     GROUP BY cs.id
@@ -287,12 +281,10 @@ export const enrollInCourseService = async (courseId, sessionId, userId) => {
       e.*,
       c.title as course_title,
       c.subtitle as course_subtitle,
-      cs.start_at,
-      u.name as instructor_name
+      cs.start_at
     FROM enrollments e
     JOIN course_sessions cs ON e.session_id = cs.id
     JOIN courses c ON cs.course_id = c.id
-    JOIN users u ON cs.instructor_id = u.id
     WHERE e.id = ?
   `, [result.lastID]);
   
@@ -310,12 +302,10 @@ export const getEnrollmentsService = async (courseId) => {
       e.created_at,
       u.name as student_name,
       u.email as student_email,
-      cs.start_at,
-      u_instructor.name as instructor_name
+      cs.start_at
     FROM enrollments e
     JOIN course_sessions cs ON e.session_id = cs.id
     JOIN users u ON e.user_id = u.id
-    JOIN users u_instructor ON cs.instructor_id = u_instructor.id
     WHERE cs.course_id = ?
     ORDER BY e.created_at DESC
   `, [courseId]);

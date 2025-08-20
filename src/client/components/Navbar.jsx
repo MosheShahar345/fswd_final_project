@@ -59,12 +59,22 @@ const Navbar = () => {
               Courses & Trips
             </Link>
             {isAuthenticated && (
-              <Link 
-                to="/dashboard" 
-                className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link 
+                  to="/dashboard" 
+                  className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
+                >
+                  Dashboard
+                </Link>
+                {user?.role === 'admin' && (
+                  <Link 
+                    to="/admin" 
+                    className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+                  >
+                    Admin
+                  </Link>
+                )}
+              </>
             )}
           </div>
 
@@ -168,6 +178,15 @@ const Navbar = () => {
               >
                 📊 Dashboard
               </Link>
+              {user?.role === 'admin' && (
+                <Link 
+                  to="/admin" 
+                  className={`mobile-nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+                  onClick={handleMobileMenuClose}
+                >
+                  ⚙️ Admin Panel
+                </Link>
+              )}
               <Link 
                 to="/dashboard?tab=profile" 
                 className="mobile-nav-link"
