@@ -1,5 +1,4 @@
 import { getDb } from '../infra/db.js';
-import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -17,12 +16,9 @@ export class ProfileService {
       `, [filename, userId]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'user_profile_picture', duration, true);
-      
       return { success: true, filename };
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'user_profile_picture', duration, false, error);
       throw new Error('Failed to update profile picture');
     }
   }
@@ -39,12 +35,9 @@ export class ProfileService {
       `, [userId]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_profile_picture', duration, true);
-      
       return user?.profile_picture || null;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_profile_picture', duration, false, error);
       throw new Error('Failed to get profile picture');
     }
   }
@@ -77,12 +70,9 @@ export class ProfileService {
       }
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'user_profile_picture_delete', duration, true);
-      
       return { success: true };
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'user_profile_picture_delete', duration, false, error);
       throw new Error('Failed to delete profile picture');
     }
   }

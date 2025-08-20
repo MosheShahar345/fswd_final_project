@@ -14,8 +14,6 @@ import refundRoutes from './routes/refunds.js';
 import profileRoutes from './routes/profile.js';
 import adminRoutes from './routes/admin.js';
 import { errorHandler, notFound } from './middlewares/error.js';
-import { requestLogger, securityLogger, rateLimitLogger, errorLogger } from './middlewares/logging.js';
-import { logger } from './utils/logger.js';
 
 const app = express();
 
@@ -53,12 +51,6 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    logger.warn(`Rate limit exceeded for IP: ${req.ip}`, {
-      ip: req.ip,
-      url: req.url,
-      method: req.method,
-      userAgent: req.get('User-Agent')
-    });
     res.status(429).json({
       error: {
         message: 'Too many requests from this IP, please try again later.',
@@ -92,12 +84,9 @@ app.use('/uploads', (req, res, next) => {
   next();
 }, express.static('public/uploads'));
 
-// Logging middleware
-app.use(requestLogger);
-app.use(securityLogger);
-app.use(rateLimitLogger);
 
-// Health check with logging
+
+// Health check
 app.get('/health', (req, res) => {
   const healthData = {
     status: 'OK',
@@ -106,12 +95,6 @@ app.get('/health', (req, res) => {
     memory: process.memoryUsage(),
     environment: process.env.NODE_ENV || 'development'
   };
-  
-  logger.info('Health check requested', {
-    requestId: req.id,
-    ip: req.ip,
-    userAgent: req.get('User-Agent')
-  });
   
   res.json(healthData);
 });
@@ -131,35 +114,28 @@ app.use('/api/admin', adminRoutes);
 // 404 handler
 app.use('*', notFound);
 
-// Error logging middleware
-app.use(errorLogger);
+
 
 // Error handler
 app.use(errorHandler);
 
-// Graceful shutdown logging
+// Graceful shutdown
 process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+  console.log('SIGTERM received, shutting down gracefully');
 });
 
 process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
+  console.log('SIGINT received, shutting down gracefully');
 });
 
-// Unhandled promise rejection logging
+// Unhandled promise rejection
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', {
-    promise: promise,
-    reason: reason
-  });
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-// Uncaught exception logging
+// Uncaught exception
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', {
-    error: error.message,
-    stack: error.stack
-  });
+  console.error('Uncaught Exception:', error.message, error.stack);
   process.exit(1);
 });
 

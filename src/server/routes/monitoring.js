@@ -1,5 +1,4 @@
 import express from 'express';
-import { logger } from '../utils/logger.js';
 import { authenticateToken, requireRole } from '../middlewares/auth.js';
 import { asyncHandler } from '../middlewares/error.js';
 import fs from 'fs';
@@ -26,11 +25,7 @@ router.get('/stats', authenticateToken, requireRole(['admin']), asyncHandler(asy
     }
   };
 
-  logger.info('Server stats requested', {
-    requestId: req.id,
-    userId: req.user.id,
-    ip: req.ip
-  });
+
 
   res.status(200).json(stats);
 }));
@@ -57,19 +52,11 @@ router.get('/logs', authenticateToken, requireRole(['admin']), asyncHandler(asyn
       }
     }
 
-    logger.info('Log files list requested', {
-      requestId: req.id,
-      userId: req.user.id,
-      fileCount: logFiles.length
-    });
+
 
     res.status(200).json({ logFiles });
   } catch (error) {
-    logger.error('Failed to read log files', {
-      requestId: req.id,
-      userId: req.user.id,
-      error: error.message
-    });
+
     throw error;
   }
 }));
@@ -120,13 +107,7 @@ router.get('/logs/:filename', authenticateToken, requireRole(['admin']), asyncHa
     // Get last N lines
     const lastLines = logLines.slice(-parseInt(lines));
 
-    logger.info('Log file viewed', {
-      requestId: req.id,
-      userId: req.user.id,
-      filename,
-      lines: lastLines.length,
-      level
-    });
+
 
     res.status(200).json({
       filename,
@@ -142,12 +123,7 @@ router.get('/logs/:filename', authenticateToken, requireRole(['admin']), asyncHa
       })
     });
   } catch (error) {
-    logger.error('Failed to read log file', {
-      requestId: req.id,
-      userId: req.user.id,
-      filename,
-      error: error.message
-    });
+
     throw error;
   }
 }));
@@ -180,23 +156,14 @@ router.delete('/logs/:filename', authenticateToken, requireRole(['admin']), asyn
 
     fs.unlinkSync(filePath);
 
-    logger.info('Log file deleted', {
-      requestId: req.id,
-      userId: req.user.id,
-      filename
-    });
+
 
     res.status(200).json({
       message: 'Log file deleted successfully',
       filename
     });
   } catch (error) {
-    logger.error('Failed to delete log file', {
-      requestId: req.id,
-      userId: req.user.id,
-      filename,
-      error: error.message
-    });
+
     throw error;
   }
 }));
@@ -231,12 +198,7 @@ router.get('/health/detailed', asyncHandler(async (req, res) => {
     healthData.memory.warning = 'High memory usage detected';
   }
 
-  logger.info('Detailed health check requested', {
-    requestId: req.id,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    memoryUsagePercent: Math.round(memoryUsagePercent * 100) / 100
-  });
+
 
   res.status(200).json(healthData);
 }));

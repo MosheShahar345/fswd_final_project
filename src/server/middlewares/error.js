@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.js';
+
 
 // Custom error classes
 export class ValidationError extends Error {
@@ -60,24 +60,12 @@ export class DatabaseError extends Error {
 
 // Enhanced error handler
 export function errorHandler(err, req, res, next) {
-  // Log the error with full context
-  logger.error(`Error in ${req.method} ${req.url}`, {
-    error: {
-      name: err.name,
-      message: err.message,
-      stack: err.stack,
-      statusCode: err.statusCode || 500
-    },
-    request: {
-      method: req.method,
-      url: req.url,
-      ip: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent'),
-      userId: req.user?.id || 'anonymous',
-      body: req.body,
-      query: req.query,
-      params: req.params
-    },
+  // Log the error to console
+  console.error(`Error in ${req.method} ${req.url}:`, {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    statusCode: err.statusCode || 500,
     timestamp: new Date().toISOString()
   });
 
@@ -181,25 +169,11 @@ export function errorHandler(err, req, res, next) {
 
   // Send error response
   res.status(statusCode).json(errorResponse);
-
-  // Log the final error response
-  logger.info(`Error response sent`, {
-    statusCode,
-    errorMessage,
-    url: req.url,
-    method: req.method,
-    userId: req.user?.id || 'anonymous'
-  });
 }
 
 // 404 handler
 export function notFound(req, res) {
-  logger.warn(`Route not found: ${req.method} ${req.url}`, {
-    method: req.method,
-    url: req.url,
-    ip: req.ip || req.connection.remoteAddress,
-    userAgent: req.get('User-Agent')
-  });
+  console.warn(`Route not found: ${req.method} ${req.url}`);
 
   res.status(404).json({
     error: {

@@ -1,6 +1,4 @@
 import { getDb } from '../infra/db.js';
-import { logger } from '../utils/logger.js';
-
 export class TripService {
   static async getAllTrips() {
     const startTime = Date.now();
@@ -19,12 +17,9 @@ export class TripService {
       `);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'all_trips', duration, true);
-
       return trips;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'all_trips', duration, false, error);
       throw new Error('Failed to fetch trips');
     }
   }
@@ -45,12 +40,9 @@ export class TripService {
       `, [id]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'trip_by_id', duration, true);
-
       return trip;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'trip_by_id', duration, false, error);
       throw new Error('Failed to fetch trip');
     }
   }
@@ -112,12 +104,9 @@ export class TripService {
       `, [result.lastID]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'trip_booking', duration, true);
-
       return booking;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'trip_booking', duration, false, error);
       throw error;
     }
   }
@@ -139,12 +128,9 @@ export class TripService {
       `, [result.lastID]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'trip', duration, true);
-
       return trip;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'trip', duration, false, error);
       throw new Error('Failed to create trip');
     }
   }
@@ -172,12 +158,9 @@ export class TripService {
       }
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'trip', duration, true);
-
       return trip;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'trip', duration, false, error);
       throw new Error('Failed to update trip');
     }
   }
@@ -202,12 +185,9 @@ export class TripService {
       `, [id]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('DELETE', 'trip', duration, true);
-
       return true;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('DELETE', 'trip', duration, false, error);
       throw new Error('Failed to delete trip');
     }
   }

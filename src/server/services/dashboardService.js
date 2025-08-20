@@ -1,9 +1,7 @@
 import { getDb } from '../infra/db.js';
-import { logger } from '../utils/logger.js';
 
 export class DashboardService {
   static async getUserOrders(userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -32,19 +30,16 @@ export class DashboardService {
         LIMIT 10
       `, [userId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_orders', duration, true);
+
       
       return orders;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_orders', duration, false, error);
+
       throw new Error('Failed to fetch user orders');
     }
   }
 
   static async getUserEnrollments(userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -69,19 +64,16 @@ export class DashboardService {
         LIMIT 5
       `, [userId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_enrollments', duration, true);
+
       
       return enrollments;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_enrollments', duration, false, error);
+
       throw new Error('Failed to fetch user enrollments');
     }
   }
 
   static async getUserTripBookings(userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -105,19 +97,16 @@ export class DashboardService {
         LIMIT 10
       `, [userId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_trip_bookings', duration, true);
+
       
       return bookings;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_trip_bookings', duration, false, error);
+
       throw new Error('Failed to fetch user trip bookings');
     }
   }
 
   static async getDashboardStats(userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -163,19 +152,16 @@ export class DashboardService {
         }
       };
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'dashboard_stats', duration, true);
+
       
       return stats;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'dashboard_stats', duration, false, error);
+
       throw new Error('Failed to fetch dashboard stats');
     }
   }
 
   static async getOrderDetails(orderId, userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -207,22 +193,19 @@ export class DashboardService {
         WHERE oi.order_id = ?
       `, [orderId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'order_details', duration, true);
+
       
       return {
         order,
         items: orderItems
       };
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'order_details', duration, false, error);
+
       throw error;
     }
   }
 
   static async getEnrollmentDetails(enrollmentId, userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -250,19 +233,16 @@ export class DashboardService {
         throw new Error('Enrollment not found');
       }
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'enrollment_details', duration, true);
+
       
       return enrollment;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'enrollment_details', duration, false, error);
+
       throw error;
     }
   }
 
   static async getTripBookingDetails(bookingId, userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -290,13 +270,11 @@ export class DashboardService {
         throw new Error('Trip booking not found');
       }
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'trip_booking_details', duration, true);
+
       
       return booking;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'trip_booking_details', duration, false, error);
+
       throw error;
     }
   }

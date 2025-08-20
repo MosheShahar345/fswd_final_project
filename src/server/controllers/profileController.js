@@ -1,6 +1,5 @@
 import { ProfileService } from '../services/profileService.js';
 import { asyncHandler } from '../middlewares/error.js';
-import { logger } from '../utils/logger.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -48,13 +47,6 @@ export const upload = multer({
 export const uploadProfilePicture = asyncHandler(async (req, res) => {
   const requestId = req.id;
   const userId = req.user.id;
-
-  logger.info('Profile picture upload request', {
-    requestId,
-    userId,
-    ip: req.ip
-  });
-
   if (!req.file) {
     return res.status(400).json({
       success: false,
@@ -78,14 +70,6 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
 
     // Update database with new filename
     const result = await ProfileService.updateProfilePicture(userId, req.file.filename);
-
-    logger.info('Profile picture uploaded successfully', {
-      requestId,
-      userId,
-      filename: req.file.filename,
-      size: req.file.size
-    });
-
     res.status(200).json({
       success: true,
       message: 'Profile picture uploaded successfully',
@@ -101,13 +85,6 @@ export const uploadProfilePicture = asyncHandler(async (req, res) => {
     } catch (deleteError) {
       console.warn('Could not delete uploaded file after error:', deleteError.message);
     }
-
-    logger.error('Profile picture upload failed', {
-      requestId,
-      userId,
-      error: error.message
-    });
-
     res.status(500).json({
       success: false,
       message: 'Failed to upload profile picture'
@@ -128,12 +105,6 @@ export const getProfilePicture = asyncHandler(async (req, res) => {
       url: filename ? `/uploads/profiles/${filename}` : null
     });
   } catch (error) {
-    logger.error('Get profile picture failed', {
-      requestId,
-      userId,
-      error: error.message
-    });
-
     res.status(500).json({
       success: false,
       message: 'Failed to get profile picture'
@@ -147,23 +118,11 @@ export const deleteProfilePicture = asyncHandler(async (req, res) => {
 
   try {
     await ProfileService.deleteProfilePicture(userId);
-
-    logger.info('Profile picture deleted successfully', {
-      requestId,
-      userId
-    });
-
     res.status(200).json({
       success: true,
       message: 'Profile picture deleted successfully'
     });
   } catch (error) {
-    logger.error('Delete profile picture failed', {
-      requestId,
-      userId,
-      error: error.message
-    });
-
     res.status(500).json({
       success: false,
       message: 'Failed to delete profile picture'

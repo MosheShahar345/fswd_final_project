@@ -1,10 +1,8 @@
 import { getDb } from '../infra/db.js';
-import { logger } from '../utils/logger.js';
 import { ConflictError, ValidationError } from '../middlewares/error.js';
 
 export class OrderService {
   static async createOrder(userId, orderData) {
-    const startTime = Date.now();
     const db = await getDb();
     
 
@@ -121,22 +119,19 @@ export class OrderService {
       // Commit transaction
       await db.run('COMMIT');
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'order_creation', duration, true);
+
       
       return { orderId, success: true };
     } catch (error) {
       // Rollback transaction on error
       await db.run('ROLLBACK');
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'order_creation', duration, false, error);
+
 
       throw error;
     }
   }
 
   static async getOrderById(orderId, userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -204,8 +199,7 @@ export class OrderService {
         AND tb.status = 'confirmed'
       `, [orderId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'order_by_id', duration, true);
+
       
       return {
         order,
@@ -214,14 +208,12 @@ export class OrderService {
         trips: tripBookings
       };
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'order_by_id', duration, false, error);
+
       throw error;
     }
   }
 
   static async getUserOrders(userId) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -239,19 +231,16 @@ export class OrderService {
         ORDER BY o.created_at DESC
       `, [userId]);
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_orders', duration, true);
+
       
       return orders;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_orders', duration, false, error);
+
       throw new Error('Failed to fetch user orders');
     }
   }
 
   static async updateOrderStatus(orderId, userId, status) {
-    const startTime = Date.now();
     const db = await getDb();
     
     try {
@@ -265,13 +254,11 @@ export class OrderService {
         throw new Error('Order not found or no changes made');
       }
 
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'order_status', duration, true);
+
       
       return { success: true };
     } catch (error) {
-      const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'order_status', duration, false, error);
+
       throw error;
     }
   }

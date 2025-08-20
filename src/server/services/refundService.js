@@ -1,6 +1,4 @@
 import { getDb } from '../infra/db.js';
-import { logger } from '../utils/logger.js';
-
 export class RefundService {
   static async createRefundRequest(userId, enrollmentId, courseId, amount, reason) {
     const startTime = Date.now();
@@ -13,8 +11,6 @@ export class RefundService {
       `, [userId, enrollmentId, courseId, amount, reason]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'refund_creation', duration, true);
-      
       return {
         id: result.lastID,
         userId,
@@ -26,7 +22,6 @@ export class RefundService {
       };
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('INSERT', 'refund_creation', duration, false, error);
       throw error;
     }
   }
@@ -50,12 +45,9 @@ export class RefundService {
       `, [userId]);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_refunds', duration, true);
-      
       return refunds;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'user_refunds', duration, false, error);
       throw error;
     }
   }
@@ -81,12 +73,9 @@ export class RefundService {
       `);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'all_refunds', duration, true);
-      
       return refunds;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'all_refunds', duration, false, error);
       throw error;
     }
   }
@@ -109,12 +98,9 @@ export class RefundService {
       }
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'refund_status', duration, true);
-      
       return { success: true, refundId, status };
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('UPDATE', 'refund_status', duration, false, error);
       throw error;
     }
   }
@@ -138,12 +124,9 @@ export class RefundService {
       `);
 
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'refund_stats', duration, true);
-      
       return stats;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.logDbOperation('SELECT', 'refund_stats', duration, false, error);
       throw error;
     }
   }
