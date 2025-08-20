@@ -1,22 +1,1 @@
-import express from 'express';
-import { OrderController } from '../controllers/orderController.js';
-import { authenticateToken } from '../middlewares/auth.js';
-
-const router = express.Router();
-
-// All order routes require authentication
-router.use(authenticateToken);
-
-// Create a new order
-router.post('/', OrderController.createOrder);
-
-// Get all orders for the current user
-router.get('/', OrderController.getUserOrders);
-
-// Get a specific order by ID
-router.get('/:orderId', OrderController.getOrderById);
-
-// Update order status
-router.patch('/:orderId/status', OrderController.updateOrderStatus);
-
-export default router;
+import express from 'express';import { OrderController } from '../controllers/orderController.js';import { authenticateToken } from '../middlewares/auth.js';const router = express.Router();// All order routes require authenticationrouter.use(authenticateToken);// Create a new orderrouter.post('/', OrderController.createOrder);// Get all orders for the current userrouter.get('/', OrderController.getUserOrders);// Get a specific order by IDrouter.get('/:orderId', OrderController.getOrderById);// Update order statusrouter.patch('/:orderId/status', OrderController.updateOrderStatus);export default router;

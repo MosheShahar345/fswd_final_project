@@ -1,24 +1,1 @@
-import express from 'express';
-import { 
-  uploadProfilePicture, 
-  getProfilePicture, 
-  deleteProfilePicture,
-  upload 
-} from '../controllers/profileController.js';
-import { authenticateToken } from '../middlewares/auth.js';
-
-const router = express.Router();
-
-// All routes require authentication
-router.use(authenticateToken);
-
-// Upload profile picture
-router.post('/picture', upload.single('profilePicture'), uploadProfilePicture);
-
-// Get profile picture
-router.get('/picture', getProfilePicture);
-
-// Delete profile picture
-router.delete('/picture', deleteProfilePicture);
-
-export default router;
+import express from 'express';import { uploadProfilePicture, getProfilePicture, deleteProfilePicture,upload } from '../controllers/profileController.js';import { authenticateToken } from '../middlewares/auth.js';const router = express.Router();// All routes require authenticationrouter.use(authenticateToken);// Upload profile picturerouter.post('/picture', upload.single('profilePicture'), uploadProfilePicture);// Get profile picturerouter.get('/picture', getProfilePicture);// Delete profile picturerouter.delete('/picture', deleteProfilePicture);export default router;

@@ -1,31 +1,1 @@
-import express from 'express';
-import { ProductController } from '../controllers/productController.js';
-import { authenticateToken, requireRole } from '../middlewares/auth.js';
-import { createProductSchema, updateProductSchema } from '../validators/products.js';
-import { ValidationError } from '../middlewares/error.js';
-
-const router = express.Router();
-
-// Validation middleware
-const validate = (schema) => (req, res, next) => {
-  try {
-    schema.parse(req.body);
-    next();
-  } catch (error) {
-    next(new ValidationError(error.errors[0].message));
-  }
-};
-
-// Public routes
-router.get('/', ProductController.getProducts);
-router.get('/categories', ProductController.getCategories);
-router.get('/brands', ProductController.getBrands);
-router.get('/stats', ProductController.getProductStats);
-router.get('/:id', ProductController.getProduct);
-
-// Protected routes (admin only)
-router.post('/', authenticateToken, requireRole(['admin']), validate(createProductSchema), ProductController.createProduct);
-router.patch('/:id', authenticateToken, requireRole(['admin']), validate(updateProductSchema), ProductController.updateProduct);
-router.delete('/:id', authenticateToken, requireRole(['admin']), ProductController.deleteProduct);
-
-export default router;
+import express from 'express';import { ProductController } from '../controllers/productController.js';import { authenticateToken, requireRole } from '../middlewares/auth.js';import { createProductSchema, updateProductSchema } from '../validators/products.js';import { ValidationError } from '../middlewares/error.js';const router = express.Router();// Validation middlewareconst validate = (schema) => (req, res, next) => {try {schema.parse(req.body);next();} catch (error) {next(new ValidationError(error.errors[0].message));}};// Public routesrouter.get('/', ProductController.getProducts);router.get('/categories', ProductController.getCategories);router.get('/brands', ProductController.getBrands);router.get('/stats', ProductController.getProductStats);router.get('/:id', ProductController.getProduct);// Protected routes (admin only)router.post('/', authenticateToken, requireRole(['admin']), validate(createProductSchema), ProductController.createProduct);router.patch('/:id', authenticateToken, requireRole(['admin']), validate(updateProductSchema), ProductController.updateProduct);router.delete('/:id', authenticateToken, requireRole(['admin']), ProductController.deleteProduct);export default router;

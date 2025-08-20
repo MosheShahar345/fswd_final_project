@@ -1,17 +1,1 @@
-import app from './app.js';
-import { getDb } from './infra/db.js';
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API base: http://localhost:${PORT}/api`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  await getDb().then(db => db.close());
-  process.exit(0);
-});
+import app from './app.js';import { getDb } from './infra/db.js';const PORT = process.env.PORT || 3000;app.listen(PORT, () => {console.log(`🚀 Server running on port ${PORT}`);console.log(`📊 Health check: http://localhost:${PORT}/health`);console.log(`🔗 API base: http://localhost:${PORT}/api`);});// Graceful shutdownprocess.on('SIGTERM', async () => {console.log('SIGTERM received, shutting down gracefully');await getDb().then(db => db.close());process.exit(0);});

@@ -14,108 +14,84 @@ import refundRoutes from './routes/refunds.js';
 import profileRoutes from './routes/profile.js';
 import adminRoutes from './routes/admin.js';
 import { errorHandler, notFound } from './middlewares/error.js';
-import { requestLogger, securityLogger, rateLimitLogger, errorLogger } from './middlewares/logging.js';
-import { logger } from './utils/logger.js';
-
 const app = express();
-
 // Request ID middleware
 app.use((req, res, next) => {
-  req.id = uuidv4();
-  res.setHeader('X-Request-ID', req.id);
-  next();
+req.id = uuidv4();
+res.setHeader('X-Request-ID', req.id);
+next();
 });
-
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:", "http://localhost:3000"],
-    },
-  },
-  crossOriginEmbedderPolicy: false
+contentSecurityPolicy: {
+directives: {
+defaultSrc: ["'self'"],
+styleSrc: ["'self'", "'unsafe-inline'"],
+scriptSrc: ["'self'"],
+imgSrc: ["'self'", "data:", "https:", "http://localhost:3000"],
+},
+},
+crossOriginEmbedderPolicy: false
 }));
-
 // Rate limiting with enhanced logging
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: {
-      message: 'Too many requests from this IP, please try again later.',
-      statusCode: 429,
-      timestamp: new Date().toISOString()
-    }
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    logger.warn(`Rate limit exceeded for IP: ${req.ip}`, {
-      ip: req.ip,
-      url: req.url,
-      method: req.method,
-      userAgent: req.get('User-Agent')
-    });
-    res.status(429).json({
-      error: {
-        message: 'Too many requests from this IP, please try again later.',
-        statusCode: 429,
-        timestamp: new Date().toISOString()
-      }
-    });
-  }
+windowMs: 15 * 60 * 1000, // 15 minutes
+max: 100, // limit each IP to 100 requests per windowMs
+message: {
+error: {
+message: 'Too many requests from this IP, please try again later.',
+statusCode: 429,
+timestamp: new Date().toISOString()
+}
+},
+standardHeaders: true,
+legacyHeaders: false,
+handler: (req, res) => {
+console.warn(`Rate limit exceeded for IP: ${req.ip}`);
+res.status(429).json({
+error: {
+message: 'Too many requests from this IP, please try again later.',
+statusCode: 429,
+timestamp: new Date().toISOString()
+}
 });
-
+}
+});
 app.use('/api/', limiter);
-
 // CORS
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID']
+origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+credentials: true,
+methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID']
 }));
-
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
 // Static file serving for uploads with CORS headers
 app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
+res.header('Access-Control-Allow-Origin', '*');
+res.header('Access-Control-Allow-Methods', 'GET');
+res.header('Access-Control-Allow-Headers', 'Content-Type');
+res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+next();
 }, express.static('public/uploads'));
-
-// Logging middleware
-app.use(requestLogger);
-app.use(securityLogger);
-app.use(rateLimitLogger);
-
-// Health check with logging
-app.get('/health', (req, res) => {
-  const healthData = {
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    environment: process.env.NODE_ENV || 'development'
-  };
-  
-  logger.info('Health check requested', {
-    requestId: req.id,
-    ip: req.ip,
-    userAgent: req.get('User-Agent')
-  });
-  
-  res.json(healthData);
+// Basic request logging (console only)
+app.use((req, res, next) => {
+console.log(`${req.method} ${req.url}`);
+next();
 });
-
+// Health check
+app.get('/health', (req, res) => {
+const healthData = {
+status: 'OK',
+timestamp: new Date().toISOString(),
+uptime: process.uptime(),
+memory: process.memoryUsage(),
+environment: process.env.NODE_ENV || 'development'
+};
+res.json(healthData);
+});
 // API routes with logging
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -127,40 +103,25 @@ app.use('/api/trips', tripRoutes);
 app.use('/api/refunds', refundRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
-
 // 404 handler
 app.use('*', notFound);
-
-// Error logging middleware
-app.use(errorLogger);
-
 // Error handler
 app.use(errorHandler);
-
-// Graceful shutdown logging
+// Graceful shutdown
 process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+console.log('SIGTERM received, shutting down gracefully');
 });
-
 process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
+console.log('SIGINT received, shutting down gracefully');
 });
-
-// Unhandled promise rejection logging
+// Unhandled promise rejection
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', {
-    promise: promise,
-    reason: reason
-  });
+console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
-
-// Uncaught exception logging
+// Uncaught exception
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', {
-    error: error.message,
-    stack: error.stack
-  });
-  process.exit(1);
+console.error('Uncaught Exception:', error.message);
+console.error(error.stack);
+process.exit(1);
 });
-
 export default app;

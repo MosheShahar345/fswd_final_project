@@ -1,28 +1,1 @@
-import { z } from 'zod';
-
-export const createProductSchema = z.object({
-  name: z.string().min(1, 'Product name is required'),
-  description: z.string().optional(),
-  brand: z.string().optional(),
-  category: z.string().optional(),
-  price: z.number().positive('Price must be positive'),
-  active: z.boolean().optional().default(true)
-});
-
-export const updateProductSchema = z.object({
-  name: z.string().min(1, 'Product name is required').optional(),
-  description: z.string().optional(),
-  brand: z.string().optional(),
-  category: z.string().optional(),
-  price: z.number().positive('Price must be positive').optional(),
-  active: z.boolean().optional()
-});
-
-export const productFiltersSchema = z.object({
-  q: z.string().optional(),
-  brand: z.string().optional(),
-  category: z.string().optional(),
-  min: z.number().optional(),
-  max: z.number().optional(),
-  sort: z.enum(['name', 'price', 'created_at']).optional().default('name')
-});
+import { z } from 'zod';export const createProductSchema = z.object({name: z.string().min(1, 'Product name is required'),description: z.string().optional(),brand: z.string().optional(),category: z.string().optional(),price: z.number().positive('Price must be positive'),active: z.boolean().optional().default(true)});export const updateProductSchema = z.object({name: z.string().min(1, 'Product name is required').optional(),description: z.string().optional(),brand: z.string().optional(),category: z.string().optional(),price: z.number().positive('Price must be positive').optional(),active: z.boolean().optional()});export const productFiltersSchema = z.object({q: z.string().optional(),brand: z.string().optional(),category: z.string().optional(),min: z.number().optional(),max: z.number().optional(),sort: z.enum(['name', 'price', 'created_at']).optional().default('name')});

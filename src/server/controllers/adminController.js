@@ -1,147 +1,1 @@
-import { AdminService } from '../services/adminService.js';
-
-export class AdminController {
-  static async getDashboard(req, res, next) {
-    try {
-      const dashboardData = await AdminService.getDashboardData();
-      res.json(dashboardData);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getAnalytics(req, res, next) {
-    try {
-      const analyticsData = await AdminService.getAnalyticsData();
-      res.json(analyticsData);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async updateUserStatus(req, res, next) {
-    try {
-      const { userId } = req.params;
-      const { status } = req.body;
-
-      if (!status) {
-        return res.status(400).json({ error: 'Status is required' });
-      }
-
-      const result = await AdminService.updateUserStatus(userId, status);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async updateUserRole(req, res, next) {
-    try {
-      const { userId } = req.params;
-      const { role } = req.body;
-
-      if (!role) {
-        return res.status(400).json({ error: 'Role is required' });
-      }
-
-      const result = await AdminService.updateUserRole(userId, role, req.user.id);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async activateUser(req, res, next) {
-    try {
-      const { userId } = req.params;
-      const result = await AdminService.updateUserStatus(userId, 'active');
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async suspendUser(req, res, next) {
-    try {
-      const { userId } = req.params;
-      const result = await AdminService.updateUserStatus(userId, 'suspended');
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async approveRefund(req, res, next) {
-    try {
-      const { refundId } = req.params;
-      const result = await AdminService.approveRefund(refundId);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async rejectRefund(req, res, next) {
-    try {
-      const { refundId } = req.params;
-      const result = await AdminService.rejectRefund(refundId);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getSystemStats(req, res, next) {
-    try {
-      const systemStats = await AdminService.getSystemStats();
-      res.json(systemStats);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async backupDatabase(req, res, next) {
-    try {
-      const result = await AdminService.backupDatabase();
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async clearCache(req, res, next) {
-    try {
-      const result = await AdminService.clearCache();
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Order Management Controllers
-  static async getAllOrders(req, res, next) {
-    try {
-      const orders = await AdminService.getAllOrders();
-      res.json(orders);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async updateOrderStatus(req, res, next) {
-    try {
-      const { orderId } = req.params;
-      const { status } = req.body;
-
-      if (!status) {
-        return res.status(400).json({ error: 'Status is required' });
-      }
-
-      const result = await AdminService.updateOrderStatus(orderId, status);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-}
-
+import { AdminService } from '../services/adminService.js';export class AdminController {static async getDashboard(req, res, next) {try {const dashboardData = await AdminService.getDashboardData();res.json(dashboardData);} catch (error) {next(error);}}static async getAnalytics(req, res, next) {try {const analyticsData = await AdminService.getAnalyticsData();res.json(analyticsData);} catch (error) {next(error);}}static async updateUserStatus(req, res, next) {try {const { userId } = req.params;const { status } = req.body;if (!status) {return res.status(400).json({ error: 'Status is required' });}const result = await AdminService.updateUserStatus(userId, status);res.json(result);} catch (error) {next(error);}}static async updateUserRole(req, res, next) {try {const { userId } = req.params;const { role } = req.body;if (!role) {return res.status(400).json({ error: 'Role is required' });}const result = await AdminService.updateUserRole(userId, role, req.user.id);res.json(result);} catch (error) {next(error);}}static async activateUser(req, res, next) {try {const { userId } = req.params;const result = await AdminService.updateUserStatus(userId, 'active');res.json(result);} catch (error) {next(error);}}static async suspendUser(req, res, next) {try {const { userId } = req.params;const result = await AdminService.updateUserStatus(userId, 'suspended');res.json(result);} catch (error) {next(error);}}static async approveRefund(req, res, next) {try {const { refundId } = req.params;const result = await AdminService.approveRefund(refundId);res.json(result);} catch (error) {next(error);}}static async rejectRefund(req, res, next) {try {const { refundId } = req.params;const result = await AdminService.rejectRefund(refundId);res.json(result);} catch (error) {next(error);}}static async getSystemStats(req, res, next) {try {const systemStats = await AdminService.getSystemStats();res.json(systemStats);} catch (error) {next(error);}}static async backupDatabase(req, res, next) {try {const result = await AdminService.backupDatabase();res.json(result);} catch (error) {next(error);}}static async clearCache(req, res, next) {try {const result = await AdminService.clearCache();res.json(result);} catch (error) {next(error);}}// Order Management Controllersstatic async getAllOrders(req, res, next) {try {const orders = await AdminService.getAllOrders();res.json(orders);} catch (error) {next(error);}}static async updateOrderStatus(req, res, next) {try {const { orderId } = req.params;const { status } = req.body;if (!status) {return res.status(400).json({ error: 'Status is required' });}const result = await AdminService.updateOrderStatus(orderId, status);res.json(result);} catch (error) {next(error);}}}
