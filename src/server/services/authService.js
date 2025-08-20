@@ -81,10 +81,9 @@ export class AuthService {
     }
 
     // Get user summaries for dashboard
-    const [orderCount, bookingCount, messageCount] = await Promise.all([
+    const [orderCount, bookingCount] = await Promise.all([
       db.get('SELECT COUNT(*) as count FROM orders WHERE user_id = ?', [userId]),
-      db.get('SELECT COUNT(*) as count FROM trip_bookings WHERE user_id = ?', [userId]),
-      db.get('SELECT COUNT(*) as count FROM messages WHERE to_user_id = ? AND read_at IS NULL', [userId])
+      db.get('SELECT COUNT(*) as count FROM trip_bookings WHERE user_id = ?', [userId])
     ]);
 
     return {
@@ -97,8 +96,7 @@ export class AuthService {
       profilePicture: user.profile_picture,
       summaries: {
         orders: orderCount.count,
-        bookings: bookingCount.count,
-        unreadMessages: messageCount.count
+        bookings: bookingCount.count
       }
     };
   }
