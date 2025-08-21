@@ -14,6 +14,7 @@ import refundRoutes from './routes/refunds.js';
 import profileRoutes from './routes/profile.js';
 import adminRoutes from './routes/admin.js';
 import { errorHandler, notFound } from './middlewares/error.js';
+
 const app = express();
 // Request ID middleware
 app.use((req, res, next) => {
@@ -35,27 +36,26 @@ crossOriginEmbedderPolicy: false
 }));
 // Rate limiting with enhanced logging
 const limiter = rateLimit({
-windowMs: 15 * 60 * 1000, // 15 minutes
-max: 100, // limit each IP to 100 requests per windowMs
-message: {
-error: {
-message: 'Too many requests from this IP, please try again later.',
-statusCode: 429,
-timestamp: new Date().toISOString()
-}
-},
-standardHeaders: true,
-legacyHeaders: false,
-handler: (req, res) => {
-console.warn(`Rate limit exceeded for IP: ${req.ip}`);
-res.status(429).json({
-error: {
-message: 'Too many requests from this IP, please try again later.',
-statusCode: 429,
-timestamp: new Date().toISOString()
-}
-});
-}
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: {
+      message: 'Too many requests from this IP, please try again later.',
+      statusCode: 429,
+      timestamp: new Date().toISOString()
+    }
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: {
+        message: 'Too many requests from this IP, please try again later.',
+        statusCode: 429,
+        timestamp: new Date().toISOString()
+      }
+    });
+  }
 });
 app.use('/api/', limiter);
 // CORS
@@ -76,21 +76,20 @@ res.header('Access-Control-Allow-Headers', 'Content-Type');
 res.header('Cross-Origin-Resource-Policy', 'cross-origin');
 next();
 }, express.static('public/uploads'));
-// Basic request logging (console only)
-app.use((req, res, next) => {
-console.log(`${req.method} ${req.url}`);
-next();
-});
+
+
+
 // Health check
 app.get('/health', (req, res) => {
-const healthData = {
-status: 'OK',
-timestamp: new Date().toISOString(),
-uptime: process.uptime(),
-memory: process.memoryUsage(),
-environment: process.env.NODE_ENV || 'development'
-};
-res.json(healthData);
+  const healthData = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    environment: process.env.NODE_ENV || 'development'
+  };
+  
+  res.json(healthData);
 });
 // API routes with logging
 app.use('/api/auth', authRoutes);
@@ -105,23 +104,28 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/admin', adminRoutes);
 // 404 handler
 app.use('*', notFound);
+
+
+
 // Error handler
 app.use(errorHandler);
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
-console.log('SIGTERM received, shutting down gracefully');
+  console.log('SIGTERM received, shutting down gracefully');
 });
 process.on('SIGINT', () => {
-console.log('SIGINT received, shutting down gracefully');
+  console.log('SIGINT received, shutting down gracefully');
 });
+
 // Unhandled promise rejection
 process.on('unhandledRejection', (reason, promise) => {
-console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
 // Uncaught exception
 process.on('uncaughtException', (error) => {
-console.error('Uncaught Exception:', error.message);
-console.error(error.stack);
-process.exit(1);
+  console.error('Uncaught Exception:', error.message, error.stack);
+  process.exit(1);
 });
 export default app;

@@ -1,3 +1,5 @@
+
+
 // Custom error classes
 export class ValidationError extends Error {
 constructor(message, field = null) {
@@ -51,105 +53,130 @@ this.statusCode = 500;
 }
 // Enhanced error handler
 export function errorHandler(err, req, res, next) {
-// Log the error to console
-console.error(`Error in ${req.method} ${req.url}:`, err.message);
-// Determine status code
-let statusCode = 500;
-let errorMessage = 'Internal server error';
-let errorDetails = null;
-// Handle different error types
-switch (err.name) {
-case 'ValidationError':
-statusCode = 400;
-errorMessage = err.message;
-errorDetails = { field: err.field };
-break;
-case 'AuthenticationError':
-statusCode = 401;
-errorMessage = err.message;
-break;
-case 'AuthorizationError':
-statusCode = 403;
-errorMessage = err.message;
-break;
-case 'NotFoundError':
-statusCode = 404;
-errorMessage = err.message;
-break;
-case 'ConflictError':
-statusCode = 409;
-errorMessage = err.message;
-break;
-case 'RateLimitError':
-statusCode = 429;
-errorMessage = err.message;
-break;
-case 'DatabaseError':
-statusCode = 500;
-errorMessage = 'Database operation failed';
-break;
-case 'SyntaxError':
-statusCode = 400;
-errorMessage = 'Invalid JSON format';
-break;
-case 'CastError':
-statusCode = 400;
-errorMessage = 'Invalid data format';
-break;
-case 'JsonWebTokenError':
-statusCode = 401;
-errorMessage = 'Invalid token';
-break;
-case 'TokenExpiredError':
-statusCode = 401;
-errorMessage = 'Token expired';
-break;
-default:
-// Check if error has a statusCode property
-if (err.statusCode) {
-statusCode = err.statusCode;
-errorMessage = err.message || 'Request failed';
+  // Log the error to console
+  console.error(`Error in ${req.method} ${req.url}:`, {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    statusCode: err.statusCode || 500,
+    timestamp: new Date().toISOString()
+  });
+
+  // Determine status code
+  let statusCode = 500;
+  let errorMessage = 'Internal server error';
+  let errorDetails = null;
+
+  // Handle different error types
+  switch (err.name) {
+    case 'ValidationError':
+      statusCode = 400;
+      errorMessage = err.message;
+      errorDetails = { field: err.field };
+      break;
+
+    case 'AuthenticationError':
+      statusCode = 401;
+      errorMessage = err.message;
+      break;
+
+    case 'AuthorizationError':
+      statusCode = 403;
+      errorMessage = err.message;
+      break;
+
+    case 'NotFoundError':
+      statusCode = 404;
+      errorMessage = err.message;
+      break;
+
+    case 'ConflictError':
+      statusCode = 409;
+      errorMessage = err.message;
+      break;
+
+    case 'RateLimitError':
+      statusCode = 429;
+      errorMessage = err.message;
+      break;
+
+    case 'DatabaseError':
+      statusCode = 500;
+      errorMessage = 'Database operation failed';
+      break;
+
+    case 'SyntaxError':
+      statusCode = 400;
+      errorMessage = 'Invalid JSON format';
+      break;
+
+    case 'CastError':
+      statusCode = 400;
+      errorMessage = 'Invalid data format';
+      break;
+
+    case 'JsonWebTokenError':
+      statusCode = 401;
+      errorMessage = 'Invalid token';
+      break;
+
+    case 'TokenExpiredError':
+      statusCode = 401;
+      errorMessage = 'Token expired';
+      break;
+
+    default:
+      // Check if error has a statusCode property
+      if (err.statusCode) {
+        statusCode = err.statusCode;
+        errorMessage = err.message || 'Request failed';
+      }
+      break;
+  }
+
+  // Create error response
+  const errorResponse = {
+    error: {
+      message: errorMessage,
+      statusCode,
+      timestamp: new Date().toISOString(),
+      path: req.url,
+      method: req.method,
+      ...(errorDetails && { details: errorDetails })
+    }
+  };
+
+  // Add request ID if available
+  if (req.id) {
+    errorResponse.error.requestId = req.id;
+  }
+
+  // Add additional details in development
+  if (process.env.NODE_ENV === 'development') {
+    errorResponse.error.stack = err.stack;
+    errorResponse.error.originalError = {
+      name: err.name,
+      message: err.message
+    };
+  }
+
+  // Send error response
+  res.status(statusCode).json(errorResponse);
 }
-break;
-}
-// Create error response
-const errorResponse = {
-error: {
-message: errorMessage,
-statusCode,
-timestamp: new Date().toISOString(),
-path: req.url,
-method: req.method,
-...(errorDetails && { details: errorDetails })
-}
-};
-// Add request ID if available
-if (req.id) {
-errorResponse.error.requestId = req.id;
-}
-// Add additional details in development
-if (process.env.NODE_ENV === 'development') {
-errorResponse.error.stack = err.stack;
-errorResponse.error.originalError = {
-name: err.name,
-message: err.message
-};
-}
-// Send error response
-res.status(statusCode).json(errorResponse);
-}
+
 // 404 handler
 export function notFound(req, res) {
-console.warn(`Route not found: ${req.method} ${req.url}`);
-res.status(404).json({
-error: {
-message: 'Route not found',
-statusCode: 404,
-timestamp: new Date().toISOString(),
-path: req.url,
-method: req.method
-}
-});
+  console.warn(`Route not found: ${req.method} ${req.url}`);
+
+  res.status(404).json({
+    error: {
+      message: 'Route not found',
+      statusCode: 404,
+      timestamp: new Date().toISOString(),
+      path: req.url,
+      method: req.method
+    }
+  });
 }
 // Async error wrapper
 export const asyncHandler = (fn) => {

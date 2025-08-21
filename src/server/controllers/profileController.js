@@ -38,80 +38,85 @@ fileSize: 5 * 1024 * 1024, // 5MB limit
 }
 });
 export const uploadProfilePicture = asyncHandler(async (req, res) => {
-const requestId = req.id;
-const userId = req.user.id;
-if (!req.file) {
-return res.status(400).json({
-success: false,
-message: 'No file uploaded'
-});
-}
-try {
-// Delete old profile picture if exists
-const oldPicture = await ProfileService.getProfilePicture(userId);
-if (oldPicture) {
-const oldFilePath = path.join(process.cwd(), 'public', 'uploads', 'profiles', oldPicture);
-try {
-if (fs.existsSync(oldFilePath)) {
-fs.unlinkSync(oldFilePath);
-}
-} catch (error) {
-console.warn('Could not delete old profile picture:', error.message);
-}
-}
-// Update database with new filename
-const result = await ProfileService.updateProfilePicture(userId, req.file.filename);
-res.status(200).json({
-success: true,
-message: 'Profile picture uploaded successfully',
-filename: req.file.filename,
-url: `/uploads/profiles/${req.file.filename}`
-});
-} catch (error) {
-// Delete uploaded file if database update fails
-try {
-if (fs.existsSync(req.file.path)) {
-fs.unlinkSync(req.file.path);
-}
-} catch (deleteError) {
-console.warn('Could not delete uploaded file after error:', deleteError.message);
-}
-res.status(500).json({
-success: false,
-message: 'Failed to upload profile picture'
-});
-}
+  const requestId = req.id;
+  const userId = req.user.id;
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'No file uploaded'
+    });
+  }
+
+  try {
+    // Delete old profile picture if exists
+    const oldPicture = await ProfileService.getProfilePicture(userId);
+    if (oldPicture) {
+      const oldFilePath = path.join(process.cwd(), 'public', 'uploads', 'profiles', oldPicture);
+      try {
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      } catch (error) {
+        console.warn('Could not delete old profile picture:', error.message);
+      }
+    }
+
+    // Update database with new filename
+    const result = await ProfileService.updateProfilePicture(userId, req.file.filename);
+    res.status(200).json({
+      success: true,
+      message: 'Profile picture uploaded successfully',
+      filename: req.file.filename,
+      url: `/uploads/profiles/${req.file.filename}`
+    });
+  } catch (error) {
+    // Delete uploaded file if database update fails
+    try {
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    } catch (deleteError) {
+      console.warn('Could not delete uploaded file after error:', deleteError.message);
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload profile picture'
+    });
+  }
 });
 export const getProfilePicture = asyncHandler(async (req, res) => {
-const requestId = req.id;
-const userId = req.user.id;
-try {
-const filename = await ProfileService.getProfilePicture(userId);
-res.status(200).json({
-success: true,
-filename,
-url: filename ? `/uploads/profiles/${filename}` : null
-});
-} catch (error) {
-res.status(500).json({
-success: false,
-message: 'Failed to get profile picture'
-});
-}
+  const requestId = req.id;
+  const userId = req.user.id;
+
+  try {
+    const filename = await ProfileService.getProfilePicture(userId);
+
+    res.status(200).json({
+      success: true,
+      filename,
+      url: filename ? `/uploads/profiles/${filename}` : null
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get profile picture'
+    });
+  }
 });
 export const deleteProfilePicture = asyncHandler(async (req, res) => {
-const requestId = req.id;
-const userId = req.user.id;
-try {
-await ProfileService.deleteProfilePicture(userId);
-res.status(200).json({
-success: true,
-message: 'Profile picture deleted successfully'
-});
-} catch (error) {
-res.status(500).json({
-success: false,
-message: 'Failed to delete profile picture'
-});
-}
+  const requestId = req.id;
+  const userId = req.user.id;
+
+  try {
+    await ProfileService.deleteProfilePicture(userId);
+    res.status(200).json({
+      success: true,
+      message: 'Profile picture deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete profile picture'
+    });
+  }
 });
